@@ -1,0 +1,3 @@
+Popcorn (L)|15.00|100
+Coca-Cola|5.00|200
+Nachos|12.50|50
