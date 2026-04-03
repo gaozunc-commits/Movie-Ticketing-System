@@ -3,39 +3,62 @@ package model;
 public class Movie {
     private String title;
     private String genre;
-    private int durationMinutes;
+    private int duration;
     private String ageRating;
-    private Hall hall;
 
-    public Movie(String title, String genre, int durationMinutes, String ageRating, Hall hall) {
-        this.title = title;
-        this.genre = genre;
-        this.durationMinutes = durationMinutes;
-        this.ageRating = ageRating;
-        this.hall = hall; // This will be set when the movie is assigned to a hall 
+    public Movie(String title, String genre, int duration, String ageRating) {
+        setTitle(title);
+        setGenre(genre);
+        setDuration(duration);
+        setAgeRating(ageRating);
     }
 
-    // Getters and Setters 
-    public Hall getHall() { return hall; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getTitle() { return title; }
-    
-    public String getGenre() { return genre; }
+    public void setTitle(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Movie title cannot be empty.");
+        }
+        this.title = title.trim();
+    }
 
-    public int getDurationMinutes() { return durationMinutes; }
+    public String getGenre() {
+        return genre;
+    }
 
-    public String getAgeRating() { return ageRating; }
+    public void setGenre(String genre) {
+        if (genre == null || genre.trim().isEmpty()) {
+            throw new IllegalArgumentException("Genre cannot be empty.");
+        }
+        this.genre = genre.trim();
+    }
 
-    public void setTitle(String title) { this.title = title; }
+    public int getDuration() {
+        return duration;
+    }
 
-    public void setGenre(String genre) { this.genre = genre; }
+    public void setDuration(int duration) {
+        if (duration <= 0) {
+            throw new IllegalArgumentException("Duration must be positive.");
+        }
+        this.duration = duration;
+    }
 
-    public void setDurationMinutes(int durationMinutes) { this.durationMinutes = durationMinutes; }
+    public String getAgeRating() {
+        return ageRating;
+    }
 
-    public void setAgeRating(String ageRating) { this.ageRating = ageRating; }
-    
+    public void setAgeRating(String ageRating) {
+        if (ageRating == null || ageRating.trim().isEmpty()) {
+            throw new IllegalArgumentException("Age rating cannot be empty.");
+        }
+        this.ageRating = ageRating.trim().toUpperCase();
+    }
+
     @Override
     public String toString() {
-        return String.format("%s [%s] - %d mins", title, genre, durationMinutes);
+        return title + " | " + genre + " | " + duration + " mins | " + ageRating;
     }
 }

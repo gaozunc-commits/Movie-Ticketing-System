@@ -1,0 +1,3 @@
+ST-1001|Avengers: Endgame|1|14:00|40|IMAX|5|8
+ST-1002|Avengers: Endgame|2|20:00|30|Standard|5|6
+ST-1003|Frozen II|2|16:30|30|Standard|5|6

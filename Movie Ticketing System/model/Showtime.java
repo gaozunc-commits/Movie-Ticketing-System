@@ -1,20 +1,28 @@
 package model;
 
 public class Showtime {
+    private String showtimeId;
     private Movie movie;
     private Hall hall;
     private String time;
-    private boolean[][] seats; // true = booked, false = available
+    private boolean[][] seatMap;
 
-    // Constructor
-    public Showtime(Movie movie, Hall hall, String time, int rows, int cols) {
+    public Showtime(String showtimeId, Movie movie, Hall hall, String time) {
+        this.showtimeId = showtimeId;
         this.movie = movie;
         this.hall = hall;
         this.time = time;
-        this.seats = new boolean[rows][cols];
+        this.seatMap = new boolean[hall.getSeatMap().length][hall.getSeatMap()[0].length];
     }
 
-    // Getters
+    public String getShowtimeId() {
+        return showtimeId;
+    }
+
+    public void setShowtimeId(String showtimeId) {
+        this.showtimeId = showtimeId;
+    }
+
     public Movie getMovie() {
         return movie;
     }
@@ -27,41 +35,51 @@ public class Showtime {
         return time;
     }
 
-    public boolean[][] getSeats() {
-        return seats;
+    public void setTime(String time) {
+        this.time = time;
     }
 
-    // Display seat map
+    public boolean[][] getSeatMap() {
+        return seatMap;
+    }
+
     public void displaySeats() {
-        System.out.println("\n===== SEAT MAP =====");
-        System.out.println("O = Available | X = Booked");
-
-        for (int i = 0; i < seats.length; i++) {
-            System.out.print("Row " + (i + 1) + ": ");
-            for (int j = 0; j < seats[i].length; j++) {
-                if (seats[i][j]) {
-                    System.out.print("X ");
-                } else {
-                    System.out.print("O ");
-                }
-            }
-            System.out.println();
-        }
+        hall.displaySeatMap(seatMap);
     }
 
-    // Book a seat
-    public boolean bookSeat(int row, int col) {
-        if (row < 0 || row >= seats.length || col < 0 || col >= seats[0].length) {
-            System.out.println("Invalid seat position!");
+    public String getSeatType(String seatNumber) {
+        int[] position = getSeatPosition(seatNumber);
+        return hall.getSeatMap()[position[0]][position[1]];
+    }
+
+    public boolean bookSeat(String seatNumber) {
+        int[] position = getSeatPosition(seatNumber);
+        int row = position[0];
+        int col = position[1];
+        if (seatMap[row][col]) {
+            System.out.println("Seat already booked.");
             return false;
         }
-
-        if (seats[row][col]) {
-            System.out.println("Seat already booked!");
-            return false;
-        }
-
-        seats[row][col] = true;
+        seatMap[row][col] = true;
         return true;
+    }
+
+    public void releaseSeat(String seatNumber) {
+        int[] position = getSeatPosition(seatNumber);
+        seatMap[position[0]][position[1]] = false;
+    }
+
+    private int[] getSeatPosition(String seatNumber) {
+        if (seatNumber == null || seatNumber.length() < 2) {
+            throw new IllegalArgumentException("Seat format must be like A1.");
+        }
+        String normalized = seatNumber.trim().toUpperCase();
+        int row = normalized.charAt(0) - 'A';
+        int col = Integer.parseInt(normalized.substring(1)) - 1;
+
+        if (row < 0 || row >= seatMap.length || col < 0 || col >= seatMap[0].length) {
+            throw new IllegalArgumentException("Seat is out of hall range.");
+        }
+        return new int[] { row, col };
     }
 }

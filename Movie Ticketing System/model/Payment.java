@@ -1,27 +1,44 @@
 package model;
 
 public class Payment {
-    private String paymentID;
+    private String paymentId;
     private double amount;
-    private String method; // e.g., "Credit Card", "E-Wallet"
+    private String method;
 
-    public Payment(String paymentID, double amount, String method) {
-        this.paymentID = paymentID;
-        this.amount = amount;
-        this.method = method;
+    public Payment(String paymentId, double amount, String method) {
+        this.paymentId = paymentId;
+        setAmount(amount);
+        setMethod(method);
     }
 
-    // Getters
-    
-    public String getPaymentID() { return paymentID; }
+    public String getPaymentId() {
+        return paymentId;
+    }
 
-    public double getAmount() { return amount; }
+    public double getAmount() {
+        return amount;
+    }
 
-    public String getMethod() { return method; }
+    public void setAmount(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Payment amount must be positive.");
+        }
+        this.amount = amount;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        if (method == null || method.trim().isEmpty()) {
+            throw new IllegalArgumentException("Payment method cannot be empty.");
+        }
+        this.method = method.trim();
+    }
 
     public void processPayment() {
-        // Tip: Use String.format to make the price look professional (2 decimal places)
-        System.out.println("Processing " + method + " payment of RM " + String.format("%.2f", amount) + "...");
-        System.out.println("Payment Successful! Transaction ID: " + paymentID);
+        System.out.println("Processing " + method + " payment: RM " + String.format("%.2f", amount));
+        System.out.println("Payment successful. ID: " + paymentId);
     }
 }

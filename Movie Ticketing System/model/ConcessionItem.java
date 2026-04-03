@@ -3,23 +3,49 @@ package model;
 public class ConcessionItem {
     private String name;
     private double price;
-    private int quantity;
+    private int stock;
 
-    public ConcessionItem(String name, double price, int quantity) {
-        this.name = name;
-        this.price = price;
-        this.quantity = quantity;
+    public ConcessionItem(String name, double price, int stock) {
+        setName(name);
+        setPrice(price);
+        setStock(stock);
     }
 
-    // Encapsulation
-    public String getName() { return name; }
-    public double getPrice() { return price; }
-    public int getQuantity() { return quantity; }
+    public String getName() {
+        return name;
+    }
 
-    public double calculateSubtotal() { return price * quantity; }
+    public void setName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Item name cannot be empty.");
+        }
+        this.name = name.trim();
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        if (price < 0) {
+            throw new IllegalArgumentException("Price cannot be negative.");
+        }
+        this.price = price;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        if (stock < 0) {
+            throw new IllegalArgumentException("Stock cannot be negative.");
+        }
+        this.stock = stock;
+    }
 
     @Override
     public String toString() {
-        return String.format("%s (x%d) - RM %.2f", name, quantity, calculateSubtotal());
+        return String.format("%s - RM %.2f | Stock: %d", name, price, stock);
     }
 }

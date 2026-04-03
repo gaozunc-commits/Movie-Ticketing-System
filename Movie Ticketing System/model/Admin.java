@@ -1,12 +1,18 @@
 package model;
 
 public class Admin extends User {
-    public Admin(String username, String password) {
-        super(username, password, "ADMIN");
+    public Admin(String username, String password, String name) {
+        super(username, password, name, "ADMIN");
     }
 
-    public void generateReport() {
-        System.out.println("Generating Best Selling Movies Report...");
-        // Logic for Task 4 would go here
+    @Override
+    public void displayMenu() {
+        System.out.println("\n--- ADMIN MENU ---");
+        System.out.println("1. Manage Movies");
+        System.out.println("2. Manage Showtimes");
+        System.out.println("3. Manage Concessions");
+        System.out.println("4. Manage Users");
+        System.out.println("5. Reports");
+        System.out.println("0. Logout");
     }
 }

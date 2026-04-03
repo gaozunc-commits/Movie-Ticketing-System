@@ -1,0 +1,3 @@
+ADMIN|admin|123|System Admin
+STAFF|staff|123|Staff One|1001
+CUSTOMER|customer|123|Guest Customer|true|0

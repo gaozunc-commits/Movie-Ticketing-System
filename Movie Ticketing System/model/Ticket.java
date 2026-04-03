@@ -2,16 +2,40 @@ package model;
 
 public abstract class Ticket {
     private String seatNumber;
-    protected double basePrice;
+    private double price;
+    private String ticketType;
 
-    public Ticket(String seatNumber, double basePrice) {
-        this.seatNumber = seatNumber;
-        this.basePrice = basePrice;
+    protected Ticket(String seatNumber, double price, String ticketType) {
+        setSeatNumber(seatNumber);
+        setPrice(price);
+        this.ticketType = ticketType;
     }
 
-    public abstract double calculateFinalPrice();
+    public abstract double calculatePrice();
 
-    public double getBasePrice() { return basePrice; }
+    public String getSeatNumber() {
+        return seatNumber;
+    }
 
-    public String getSeatNumber() { return seatNumber; }
+    public void setSeatNumber(String seatNumber) {
+        if (seatNumber == null || seatNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Seat number cannot be empty.");
+        }
+        this.seatNumber = seatNumber.trim().toUpperCase();
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        if (price <= 0) {
+            throw new IllegalArgumentException("Price must be positive.");
+        }
+        this.price = price;
+    }
+
+    public String getTicketType() {
+        return ticketType;
+    }
 }

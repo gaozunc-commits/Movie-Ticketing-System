@@ -2,56 +2,83 @@ package model;
 
 public class Hall {
     private int hallNumber;
-    private int rows;
-    private int cols;
-    private char[][] seatMap;
+    private int capacity;
+    private String screenType;
+    private String[][] seatMap;
 
-    public Hall(int hallNumber, int rows, int cols) {
-        this.hallNumber = hallNumber;
-        this.rows = rows;
-        this.cols = cols;
-        this.seatMap = new char[rows][cols];
+    public Hall(int hallNumber, int capacity, String screenType, int rows, int cols) {
+        setHallNumber(hallNumber);
+        setCapacity(capacity);
+        setScreenType(screenType);
+        this.seatMap = new String[rows][cols];
         initializeSeats();
     }
 
     private void initializeSeats() {
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                seatMap[i][j] = 'O'; // 'O' for Available, 'X' for Booked
+        for (int i = 0; i < seatMap.length; i++) {
+            for (int j = 0; j < seatMap[i].length; j++) {
+                if (i < 2) {
+                    seatMap[i][j] = "VIP";
+                } else {
+                    seatMap[i][j] = "STD";
+                }
             }
         }
     }
 
-    public void displaySeatMap() {
-        System.out.println("\n--- Screen This Way ---");
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                System.out.print(seatMap[i][j] + " ");
+    public int getHallNumber() {
+        return hallNumber;
+    }
+
+    public void setHallNumber(int hallNumber) {
+        if (hallNumber <= 0) {
+            throw new IllegalArgumentException("Hall number must be positive.");
+        }
+        this.hallNumber = hallNumber;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("Capacity must be positive.");
+        }
+        this.capacity = capacity;
+    }
+
+    public String getScreenType() {
+        return screenType;
+    }
+
+    public void setScreenType(String screenType) {
+        if (screenType == null || screenType.trim().isEmpty()) {
+            throw new IllegalArgumentException("Screen type cannot be empty.");
+        }
+        this.screenType = screenType.trim();
+    }
+
+    public String[][] getSeatMap() {
+        return seatMap;
+    }
+
+    public void displaySeatMap(boolean[][] bookedSeats) {
+        System.out.println("\n--- SCREEN THIS WAY ---");
+        System.out.println("VIP/STD with O(open) or X(booked)\n");
+        for (int i = 0; i < seatMap.length; i++) {
+            char rowLabel = (char) ('A' + i);
+            System.out.print(rowLabel + " ");
+            for (int j = 0; j < seatMap[i].length; j++) {
+                String marker = bookedSeats[i][j] ? "X" : "O";
+                System.out.print(seatMap[i][j] + "-" + marker + "   ");
             }
             System.out.println();
         }
-    }
-
-    public boolean bookSeat(String seatInput) {
-        try {
-            // Convert "A1" -> Row 0, Col 0
-            int rowIndex = Character.toUpperCase(seatInput.charAt(0)) - 'A';
-            int colIndex = Character.getNumericValue(seatInput.charAt(1)) - 1;
-
-            if (rowIndex >= 0 && rowIndex < rows && colIndex >= 0 && colIndex < cols) {
-                if (seatMap[rowIndex][colIndex] == 'O') {
-                    seatMap[rowIndex][colIndex] = 'X'; // Mark as booked
-                    System.out.println("✅ Seat " + seatInput + " confirmed!");
-                    return true;
-                } else {
-                    System.out.println("❌ Seat " + seatInput + " is already taken!");
-                }
-            } else {
-                System.out.println("❌ Invalid seat coordinates!");
-            }
-        } catch (Exception e) {
-            System.out.println("❌ Invalid format! Please use Letter+Number (e.g., A1).");
+        System.out.print("  ");
+        for (int j = 0; j < seatMap[0].length; j++) {
+            System.out.print((j + 1) + "       ");
         }
-        return false;
+        System.out.println();
     }
 }
