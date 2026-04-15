@@ -52,11 +52,7 @@ public class Main {
         if (MOVIE_SERVICE.readAllMovies().length == 0) {
             MOVIE_SERVICE.createMovie(new Movie("Avengers Reassembled", "Action", 132, "PG13"));
             MOVIE_SERVICE.createMovie(new Movie("Ocean Echo", "Sci-Fi", 118, "PG"));
-        }
-        if (CONCESSION_SERVICE.readAllItems().length == 0) {
-            CONCESSION_SERVICE.createItem(new ConcessionItem("Popcorn", 8.5, 100));
-            CONCESSION_SERVICE.createItem(new ConcessionItem("Cola", 5.0, 120));
-            CONCESSION_SERVICE.createItem(new ConcessionItem("Combo Set", 12.0, 80));
+        
         }
         if (BOOKING_SERVICE.readAllShowtimes().length == 0) {
             Movie[] movies = MOVIE_SERVICE.readAllMovies();

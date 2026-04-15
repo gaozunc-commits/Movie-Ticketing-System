@@ -62,6 +62,7 @@ public class AdminMenuHandler {
                     case 5:
                         reportService.bestSellingMovies();
                         reportService.peakHours();
+                        reportService.concessionReport();
                         break;
                     case 0:
                         System.out.println("Logging out...");
@@ -181,26 +182,35 @@ public class AdminMenuHandler {
         int option = readInt("Select: ");
         switch (option) {
             case 1:
-                concessionService.createItem(
-                    new ConcessionItem(
-                        readText("Name: "),
-                        readDouble("Price: "),
-                        readInt("Stock: ")
-                    )
-                );
-                break;
+    System.out.println("\n[Create Concession Item]");
+
+    concessionService.createItem(
+        new ConcessionItem(
+            readText("Name: "),
+            readDouble("Price: "),
+            readInt("Stock: "),
+            readText("Category (FOOD/DRINK/SNACK): ").toUpperCase()
+        )
+    );
+    System.out.println("Concession item created successfully.");
+    break;
             case 2:
                 concessionService.displayConcessions();
                 break;
             case 3:
-                concessionService.displayConcessions();
-                int updateIndex = chooseIndex("Concession index: ", concessionService.readAllItems().length);
-                concessionService.updateItem(
-                    updateIndex,
-                    readText("New name: "),
-                    readDouble("New price: "),
-                    readInt("New stock: ")
-                );
+    concessionService.displayConcessions();
+    int updateIndex = chooseIndex("Concession index: ", concessionService.readAllItems().length);
+
+    concessionService.updateItem(
+        updateIndex,
+        readText("New name: "),
+        readDouble("New price: "),
+        readInt("New stock: "),
+        readText("New category (FOOD/DRINK/SNACK): ").toUpperCase()
+    );
+
+    System.out.println("Concession updated successfully.");
+    
                 break;
             case 4:
                 concessionService.displayConcessions();

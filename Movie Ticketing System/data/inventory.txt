@@ -1,3 +1,15 @@
-Popcorn (L)|15.0|100
-Coca-Cola|5.0|175
-Nachos|12.5|95
+Burger|10.5|47|FOOD
+Pizza|15.0|0|FOOD
+Hotdog|6.0|56|FOOD
+Fried Chicken|12.0|35|FOOD
+Nuggets|8.0|70|FOOD
+Coca Cola|5.0|100|DRINK
+Pepsi|5.0|90|DRINK
+Mineral Water|2.0|150|DRINK
+Orange Juice|6.5|60|DRINK
+Milk Tea|7.0|80|DRINK
+Popcorn|9.0|121|SNACK
+Nachos|9.0|70|SNACK
+Chocolate Bar|3.5|200|SNACK
+Candy|2.5|0|SNACK
+Ice Cream|6.0|87|SNACK
