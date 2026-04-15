@@ -6,38 +6,45 @@ import model.Staff;
 import model.User;
 import util.FileHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class UserService {
     private static final String FILE_PATH = "data/users.txt";
-    private final List<User> users;
+    private User[] users;
+    private int userCount;
 
     public UserService() {
-        users = new ArrayList<>();
+        users = new User[0];
+        userCount = 0;
         load();
-        if (users.isEmpty()) {
-            users.add(new Admin("admin", "123", "System Admin"));
-            users.add(new Staff("staff", "123", "Staff One", 1001));
-            users.add(new Customer("customer", "123", "Guest Customer", true));
+        if (userCount == 0) {
+            users = appendUser(users, new Admin("admin", "123", "System Admin"));
+            userCount++;
+            users = appendUser(users, new Staff("staff", "123", "Staff One", 1001));
+            userCount++;
+            users = appendUser(users, new Customer("customer", "123", "Guest Customer", true));
+            userCount++;
             save();
         }
     }
 
     public void createUser(User user) {
-        users.add(user);
+        users = appendUser(users, user);
+        userCount++;
         save();
     }
 
-    public List<User> readAllUsers() {
-        return new ArrayList<>(users);
+    public User[] readAllUsers() {
+        User[] copied = new User[userCount];
+        for (int i = 0; i < userCount; i++) {
+            copied[i] = users[i];
+        }
+        return copied;
     }
 
     public User readUserByIndex(int index) {
-        if (index < 0 || index >= users.size()) {
-            throw new IllegalArgumentException("User index out of range.");
+        if (index < 0 || index >= userCount) {
+            throw new ArrayIndexOutOfBoundsException("User index out of range.");
         }
-        return users.get(index);
+        return users[index];
     }
 
     public void updateUserName(int index, String newName) {
@@ -47,57 +54,101 @@ public class UserService {
     }
 
     public void deleteUser(int index) {
-        if (index < 0 || index >= users.size()) {
-            throw new IllegalArgumentException("User index out of range.");
+        if (index < 0 || index >= userCount) {
+            throw new ArrayIndexOutOfBoundsException("User index out of range.");
         }
-        users.remove(index);
+        users = removeUserAt(users, index);
+        userCount--;
         save();
     }
 
     public User authenticate(String username, String password) {
-        for (User user : users) {
-            if (user.login(username, password)) {
-                return user;
+        for (int i = 0; i < userCount; i++) {
+            if (users[i].login(username, password)) {
+                return users[i];
             }
         }
-        throw new IllegalArgumentException("Invalid username or password.");
+        throw new ArrayIndexOutOfBoundsException("Invalid username or password.");
     }
 
     private void save() {
-        List<String> lines = new ArrayList<>();
-        for (User user : users) {
+        String[] lines = new String[userCount];
+        for (int i = 0; i < userCount; i++) {
+            User user = users[i];
             if (user instanceof Admin) {
-                lines.add("ADMIN|" + user.getUsername() + "|" + user.getPassword() + "|" + user.getName());
+                lines[i] = "ADMIN|" + user.getUsername() + "|" + user.getPassword() + "|" + user.getName();
             } else if (user instanceof Staff) {
                 Staff staff = (Staff) user;
-                lines.add("STAFF|" + user.getUsername() + "|" + user.getPassword() + "|" + user.getName() + "|" + staff.getStaffId());
+                lines[i] = "STAFF|" + user.getUsername() + "|" + user.getPassword() + "|" + user.getName() + "|" + staff.getStaffId();
             } else if (user instanceof Customer) {
                 Customer customer = (Customer) user;
-                lines.add("CUSTOMER|" + user.getUsername() + "|" + user.getPassword() + "|" + user.getName() + "|" + customer.isLoyaltyMember() + "|" + customer.getLoyaltyPoints());
+                lines[i] = "CUSTOMER|" + user.getUsername() + "|" + user.getPassword() + "|" + user.getName() + "|" + customer.isLoyaltyMember() + "|" + customer.getLoyaltyPoints();
             }
         }
         FileHandler.overwriteFile(FILE_PATH, lines);
     }
 
     private void load() {
-        users.clear();
-        List<String> lines = FileHandler.readFromFile(FILE_PATH);
+        users = new User[0];
+        userCount = 0;
+        String[] lines = FileHandler.readFromFile(FILE_PATH);
         for (String line : lines) {
             try {
                 String[] parts = line.split("\\|");
                 if (parts[0].equals("ADMIN") && parts.length >= 4) {
-                    users.add(new Admin(parts[1], parts[2], parts[3]));
+                    users = appendUser(users, new Admin(parts[1], parts[2], parts[3]));
+                    userCount++;
                 } else if (parts[0].equals("STAFF") && parts.length >= 5) {
-                    users.add(new Staff(parts[1], parts[2], parts[3], Integer.parseInt(parts[4])));
+                    users = appendUser(users, new Staff(parts[1], parts[2], parts[3], Integer.parseInt(parts[4])));
+                    userCount++;
                 } else if (parts[0].equals("CUSTOMER") && parts.length >= 6) {
                     Customer customer = new Customer(parts[1], parts[2], parts[3], Boolean.parseBoolean(parts[4]));
                     int points = Integer.parseInt(parts[5]);
                     customer.addLoyaltyPoints(points);
-                    users.add(customer);
+                    users = appendUser(users, customer);
+                    userCount++;
                 }
-            } catch (Exception ex) {
+            } catch (Exception e) {
                 System.out.println("Skipping invalid user record: " + line);
             }
         }
+    }
+
+    private User[] appendUser(User[] source, User user) {
+        User[] expanded = new User[source.length + 1];
+        for (int i = 0; i < source.length; i++) {
+            expanded[i] = source[i];
+        }
+        expanded[source.length] = user;
+        return expanded;
+    }
+
+    private User[] removeUserAt(User[] source, int index) {
+        User[] reduced = new User[source.length - 1];
+        int target = 0;
+        for (int i = 0; i < source.length; i++) {
+            if (i == index) {
+                continue;
+            }
+            reduced[target++] = source[i];
+        }
+        return reduced;
+    }
+
+    public void displayUsers() {
+        User[] allUsers = readAllUsers();
+        System.out.println("\n--------------------------------------------------------------------------");
+        System.out.printf("%-5s %-18s %-12s %-25s%n", "No.", "Username", "Role", "Name");
+        System.out.println("--------------------------------------------------------------------------");
+        if (allUsers.length == 0) {
+            System.out.println("No users available.");
+            System.out.println("--------------------------------------------------------------------------");
+            return;
+        }
+        for (int i = 0; i < allUsers.length; i++) {
+            User user = allUsers[i];
+            System.out.printf("%-5d %-18s %-12s %-25s%n", i + 1, user.getUsername(), user.getRole(), user.getName());
+        }
+        System.out.println("--------------------------------------------------------------------------");
     }
 }

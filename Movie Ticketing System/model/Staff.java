@@ -3,23 +3,25 @@ package model;
 public class Staff extends User {
     private int staffId;
 
+    // Parameterized constructor for staff user creation.
     public Staff(String username, String password, String name, int staffId) {
         super(username, password, name, "STAFF");
         setStaffId(staffId);
     }
 
+    // Getter for staff ID.
     public int getStaffId() {
         return staffId;
     }
 
+    // Setter for staff ID with validation.
     public void setStaffId(int staffId) {
         if (staffId <= 0) {
-            throw new IllegalArgumentException("Staff ID must be positive.");
+            throw new ArrayIndexOutOfBoundsException("Staff ID must be positive.");
         }
         this.staffId = staffId;
     }
 
-    @Override
     public void displayMenu() {
         System.out.println("\n--- STAFF MENU ---");
         System.out.println("1. Validate Ticket");

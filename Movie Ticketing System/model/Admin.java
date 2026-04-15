@@ -1,11 +1,11 @@
 package model;
 
 public class Admin extends User {
+    // Parameterized constructor for admin user creation.
     public Admin(String username, String password, String name) {
         super(username, password, name, "ADMIN");
     }
 
-    @Override
     public void displayMenu() {
         System.out.println("\n--- ADMIN MENU ---");
         System.out.println("1. Manage Movies");

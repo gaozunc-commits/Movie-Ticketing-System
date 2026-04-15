@@ -1,7 +1,6 @@
 package service;
 
 import model.Movie;
-import java.util.List;
 
 public class MovieManager {
     private final MovieService movieService;
@@ -15,13 +14,13 @@ public class MovieManager {
     }
 
     public void displayMovies() {
-        List<Movie> movies = movieService.readAllMovies();
-        if (movies.isEmpty()) {
+        Movie[] movies = movieService.readAllMovies();
+        if (movies.length == 0) {
             System.out.println("No movies currently showing.");
         } else {
             System.out.println("\n--- NOW SHOWING ---");
-            for (int i = 0; i < movies.size(); i++) {
-                System.out.println((i + 1) + ". " + movies.get(i));
+            for (int i = 0; i < movies.length; i++) {
+                System.out.println((i + 1) + ". " + movies[i]);
             }
         }
     }
