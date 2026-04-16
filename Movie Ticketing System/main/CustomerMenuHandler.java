@@ -1,21 +1,12 @@
 package main;
 
-import model.ConcessionItem;
-import model.Customer;
-import model.Order;
-import model.Payment;
-import model.Showtime;
-import model.Ticket;
-import service.BookingService;
-import service.ConcessionService;
-import service.MovieService;
-import service.PaymentService;
-import util.FileHandler;
-import util.InputValidator;
+import model.*;
+import service.*;
 
 import java.util.Scanner;
 
 public class CustomerMenuHandler {
+
     private final Scanner scanner;
     private final MovieService movieService;
     private final ConcessionService concessionService;
@@ -23,11 +14,11 @@ public class CustomerMenuHandler {
     private final PaymentService paymentService;
 
     public CustomerMenuHandler(
-        Scanner scanner,
-        MovieService movieService,
-        ConcessionService concessionService,
-        BookingService bookingService,
-        PaymentService paymentService
+            Scanner scanner,
+            MovieService movieService,
+            ConcessionService concessionService,
+            BookingService bookingService,
+            PaymentService paymentService
     ) {
         this.scanner = scanner;
         this.movieService = movieService;
@@ -37,169 +28,189 @@ public class CustomerMenuHandler {
     }
 
     public void run(Customer customer) {
-        boolean keepCustomerMenuOpen = true;
-        do {
+        boolean running = true;
+
+        while (running) {
             System.out.println(this);
             int choice = readInt("Select: ");
+
             try {
                 switch (choice) {
-                    case 1:
-                        showMoviesAndShowtimes();
-                        break;
-                    case 2:
-                        placeOrder(customer);
-                        break;
-                    case 3:
-                        bookingService.displayOrderReceipts();
-                        break;
-                    case 4:
-                        showTrailers();
-                        break;
-                    case 0:
-                        keepCustomerMenuOpen = false;
-                        break;
-                    default:
-                        System.out.println("Invalid menu option.");
+                    case 1 -> showMoviesAndShowtimes();
+                    case 2 -> placeOrder(customer);
+                    case 3 -> bookingService.displayOrderReceipts();
+                    case 4 -> showTrailers();
+                    case 0 -> running = false;
+                    default -> System.out.println("Invalid option");
                 }
             } catch (Exception e) {
                 System.out.println("Customer flow error: " + e.getMessage());
             }
-        } while (keepCustomerMenuOpen);
+        }
     }
 
     public String toString() {
         return "\n--- CUSTOMER MENU ---\n"
-            + "1. Browse Movies\n"
-            + "2. Book Ticket\n"
-            + "3. View My Orders\n"
-            + "4. Upcoming Trailers\n"
-            + "0. Logout";
+                + "1. Browse Movies\n"
+                + "2. Book Ticket\n"
+                + "3. View Orders\n"
+                + "4. Trailers\n"
+                + "0. Logout";
     }
 
-    private void placeOrder(Customer customer) throws ArrayIndexOutOfBoundsException {
+    private void placeOrder(Customer customer) {
         Showtime showtime = null;
         String seat = "";
         boolean seatBooked = false;
+
         try {
             bookingService.displayShowtimes();
-            showtime = bookingService.readShowtimeByIndex(chooseIndex("Select showtime index: ", bookingService.readAllShowtimes().length));
+
+            showtime = bookingService.readShowtimeByIndex(
+                    safeIndex("Select showtime: ", bookingService.readAllShowtimes().length)
+            );
+
             showtime.displaySeats();
-            boolean validSeatChosen = false;
-            do {
+
+            while (true) {
+                System.out.print("Seat: ");
+                seat = readText("").toUpperCase();
+
                 try {
-                    seat = readText("Choose seat (e.g., A1): ").toUpperCase();
-                    InputValidator.validateSeatFormat(seat);
-                    if (!showtime.bookSeat(seat)) {
-                        System.out.println("Seat not available. Please choose another seat.");
-                    } else {
+                    if (showtime.bookSeat(seat)) {
                         seatBooked = true;
-                        validSeatChosen = true;
+                        bookingService.persistShowtimes();
+                        break;
+                    } else {
+                        System.out.println("Seat taken. Try another seat.");
                     }
                 } catch (Exception e) {
-                    System.out.println("Invalid seat format. Please use format like A1.");
+                    System.out.println("Invalid seat format. Try again.");
                 }
-            } while (!validSeatChosen);
+            }
 
             Order order = bookingService.createOrder(customer.getUsername(), showtime);
             Ticket ticket = bookingService.createTicketForSeat(showtime, seat);
             order.addTicket(ticket);
 
-            boolean validConcessionChoice = false;
-            do {
-                System.out.println("\n==================== CONCESSION ADD-ON ====================");
-                System.out.println("Would you like to add snacks/drinks to this order?");
-                System.out.print("Add concession item? (y/n): ");
-                String addConcessionChoice = scanner.nextLine();
-                if (addConcessionChoice.equalsIgnoreCase("y")) {
-                    concessionService.displayConcessions();
-                    int index = chooseIndex("Concession index: ", concessionService.readAllItems().length);
-                    int quantity = readInt("Quantity: ");
-                    ConcessionItem item = concessionService.readItemByIndex(index);
-                    concessionService.deductStock(index, quantity);
-                    order.addConcessionItem(item, quantity);
-                    double addOnSubtotal = item.getPrice() * quantity;
-                    System.out.println("Added: " + item.getName() + " x" + quantity + " (RM " + String.format("%.2f", addOnSubtotal) + ")");
-                    validConcessionChoice = true;
-                } else if (addConcessionChoice.equalsIgnoreCase("n")) {
-                    System.out.println("No concession item added.");
-                    validConcessionChoice = true;
-                } else {
-                    System.out.println("Invalid choice. Please enter y or n.");
-                }
-            } while (!validConcessionChoice);
+            // ===== CONCESSION LOOP =====
+            while (true) {
+                System.out.print("Add concession? (y/n): ");
+                String ans = scanner.nextLine().trim().toLowerCase();
 
+                if (ans.equals("n")) break;
+                if (!ans.equals("y")) {
+                    System.out.println("Enter only y or n");
+                    continue;
+                }
+
+                concessionService.displayConcessions();
+
+                int idx = safeIndex("Index: ", concessionService.readAllItems().length);
+                if (idx == -1) continue;
+
+                ConcessionItem item = concessionService.readItemByIndex(idx);
+
+                if (item.getStock() <= 0) {
+                    System.out.println("Out of stock");
+                    continue;
+                }
+
+                int qty;
+                while (true) {
+                    qty = readInt("Qty: ");
+
+                    if (qty <= 0) {
+                        System.out.println("Qty must > 0");
+                        continue;
+                    }
+
+                    if (qty > item.getStock()) {
+                        System.out.println("Not enough stock: " + item.getStock());
+                        continue;
+                    }
+
+                    break;
+                }
+
+                concessionService.deductStock(idx, qty);
+                order.addConcessionItem(item, qty);
+
+                System.out.println("Added.");
+            }
+
+            // ===== PAYMENT =====
             Payment payment = paymentService.processPaymentByChoice(order.getTotalPrice(), scanner);
             order.setPaymentMethod(payment.getMethod());
+
             customer.addLoyaltyPoints((int) Math.ceil(order.getTotalPrice()));
+
             bookingService.persistOrder(order);
-            System.out.println("Order complete. Order ID: " + order.getOrderId());
+
+            System.out.println("Order completed: " + order.getOrderId());
+
         } catch (Exception e) {
-            if (showtime != null && seat != null && seatBooked) {
+            if (showtime != null && seatBooked) {
                 showtime.releaseSeat(seat);
+                bookingService.persistShowtimes();
             }
-            throw new ArrayIndexOutOfBoundsException(e.getMessage());
-        } finally {
-            System.out.println("Booking flow ended.");
+            throw e;
+        }
+    }
+
+    private int safeIndex(String msg, int size) {
+        if (size <= 0) {
+            System.out.println("No data available");
+            return -1;
+        }
+
+        while (true) {
+            int i = readInt(msg) - 1;
+            if (i >= 0 && i < size) return i;
+            System.out.println("Invalid index, try again");
         }
     }
 
     private void showMoviesAndShowtimes() {
-        System.out.println("\n--- NOW SHOWING ---");
+        System.out.println("\n--- MOVIES ---");
         movieService.displayMovies();
+
         System.out.println("\n--- SHOWTIMES ---");
         bookingService.displayShowtimes();
     }
 
     private void showTrailers() {
-        String[] trailers = FileHandler.readFromFile("data/trailers.txt");
-        System.out.println("\n--- UPCOMING TRAILERS ---");
-        if (trailers.length == 0) {
-            System.out.println("No trailers available.");
+        String[] t = util.FileHandler.readFromFile("data/trailers.txt");
+
+        System.out.println("\n--- TRAILERS ---");
+
+        if (t.length == 0) {
+            System.out.println("No trailers.");
             return;
         }
-        for (String trailer : trailers) {
-            System.out.println("- " + trailer);
+
+        for (String x : t) {
+            System.out.println("- " + x);
         }
     }
 
-    private int readInt(String prompt) {
-        boolean validIntegerReceived = false;
-        int parsedValue = 0;
-        do {
+    private int readInt(String msg) {
+        while (true) {
             try {
-                System.out.print(prompt);
-                parsedValue = InputValidator.parseIntInRange(scanner.nextLine(), Integer.MIN_VALUE, Integer.MAX_VALUE);
-                validIntegerReceived = true;
+                System.out.print(msg);
+                return Integer.parseInt(scanner.nextLine());
             } catch (Exception e) {
-                System.out.println("Invalid input: " + e.getMessage());
+                System.out.println("Invalid number");
             }
-        } while (!validIntegerReceived);
-        return parsedValue;
+        }
     }
 
-    private String readText(String prompt) {
-        boolean validTextReceived = false;
-        String parsedText = "";
-        do {
-            try {
-                System.out.print(prompt);
-                parsedText = InputValidator.requireText(scanner.nextLine(), "Input");
-                validTextReceived = true;
-            } catch (Exception e) {
-                System.out.println("Invalid input: " + e.getMessage());
-            }
-        } while (!validTextReceived);
-        return parsedText;
-    }
-
-    private int chooseIndex(String prompt, int length) throws ArrayIndexOutOfBoundsException {
-        if (length <= 0) {
-            throw new ArrayIndexOutOfBoundsException("No records available.");
+    private String readText(String msg) {
+        while (true) {
+            System.out.print(msg);
+            String s = scanner.nextLine();
+            if (!s.trim().isEmpty()) return s;
+            System.out.println("Empty input");
         }
-        int selected = readInt(prompt) - 1;
-        if (selected < 0 || selected >= length) {
-            throw new ArrayIndexOutOfBoundsException("Index out of range.");
-        }
-        return selected;
     }
 }
