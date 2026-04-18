@@ -36,6 +36,77 @@ public class ReportService {
             System.out.println(movieTitles[i] + " -> " + movieCounts[i] + " orders");
         }
     }
+      public void concessionReport() {
+
+        String[] orders = FileHandler.readFromFile(ORDER_FILE);
+
+        int foodQty = 0;
+        int drinkQty = 0;
+        int snackQty = 0;
+
+        double foodSales = 0;
+        double drinkSales = 0;
+        double snackSales = 0;
+
+        System.out.println("\n--- CONCESSION SALES REPORT ---");
+
+        for (String line : orders) {
+            String[] parts = line.split("\\|");
+
+            // MUST be at least 7 columns for concession lines
+            if (parts.length < 7) continue;
+
+            String type = parts[3];
+
+            // ❗ IMPORTANT: skip ticket / total lines
+            if (!type.equalsIgnoreCase("FOOD")
+                    && !type.equalsIgnoreCase("DRINK")
+                    && !type.equalsIgnoreCase("SNACK")) {
+                continue;
+            }
+
+            String itemName = parts[4];
+
+            int qty;
+            double price;
+
+            try {
+                qty = Integer.parseInt(parts[5]);
+                price = Double.parseDouble(parts[6]);
+            } catch (Exception e) {
+                continue; // skip bad data like A3 etc
+            }
+
+            double total = qty * price;
+
+            switch (type.toUpperCase()) {
+                case "FOOD":
+                    foodQty += qty;
+                    foodSales += total;
+                    System.out.println("[FOOD] " + itemName + " x" + qty + " = RM " + total);
+                    break;
+
+                case "DRINK":
+                    drinkQty += qty;
+                    drinkSales += total;
+                    System.out.println("[DRINK] " + itemName + " x" + qty + " = RM " + total);
+                    break;
+
+                case "SNACK":
+                    snackQty += qty;
+                    snackSales += total;
+                    System.out.println("[SNACK] " + itemName + " x" + qty + " = RM " + total);
+                    break;
+            }
+        }
+
+        System.out.println("\n===== SUMMARY =====");
+        System.out.println("FOOD  : " + foodQty + " items | RM " + foodSales);
+        System.out.println("DRINK : " + drinkQty + " items | RM " + drinkSales);
+        System.out.println("SNACK : " + snackQty + " items | RM " + snackSales);
+    }
+
+
 
     public void peakHours() {
         String[] orders = FileHandler.readFromFile(ORDER_FILE);

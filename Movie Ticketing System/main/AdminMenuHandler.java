@@ -1,6 +1,5 @@
 package main;
 
-import java.util.Scanner;
 import model.Admin;
 import model.ConcessionItem;
 import model.Customer;
@@ -14,6 +13,8 @@ import service.MovieService;
 import service.ReportService;
 import service.UserService;
 import util.InputValidator;
+
+import java.util.Scanner;
 
 public class AdminMenuHandler {
     private final Scanner scanner;
@@ -29,7 +30,8 @@ public class AdminMenuHandler {
             ConcessionService concessionService,
             UserService userService,
             BookingService bookingService,
-            ReportService reportService) {
+            ReportService reportService
+    ) {
         this.scanner = scanner;
         this.movieService = movieService;
         this.concessionService = concessionService;
@@ -60,6 +62,7 @@ public class AdminMenuHandler {
                     case 5:
                         reportService.bestSellingMovies();
                         reportService.peakHours();
+                        reportService.concessionReport();
                         break;
                     case 0:
                         System.out.println("Logging out...");
@@ -101,33 +104,50 @@ public class AdminMenuHandler {
                                 readText("Title: "),
                                 readText("Genre: "),
                                 readInt("Duration: "),
-                                readText("Age Rating: ")));
+                                readText("Age Rating: ")
+                        )
+                );
                 System.out.println("Movie created successfully.");
                 break;
+
             case 2:
                 System.out.println("\n[View Movies]");
                 movieService.displayMovies();
                 bookingService.displayShowtimes();
                 break;
+
             case 3:
                 System.out.println("\n[Update Movie]");
                 movieService.displayMovies();
+                if (movieService.readAllMovies().length == 0) {
+                    System.out.println("No movies available.");
+                    return;
+                }
                 int indexUpdate = chooseIndex("Movie index: ", movieService.readAllMovies().length);
+                if (indexUpdate < 0) return;
                 movieService.updateMovie(
                         indexUpdate,
                         readText("New title: "),
                         readText("New genre: "),
                         readInt("New duration: "),
-                        readText("New age rating: "));
+                        readText("New age rating: ")
+                );
                 System.out.println("Movie updated successfully.");
                 break;
+
             case 4:
                 System.out.println("\n[Delete Movie]");
                 movieService.displayMovies();
+                if (movieService.readAllMovies().length == 0) {
+                    System.out.println("No movies available.");
+                    return;
+                }
                 int indexDelete = chooseIndex("Movie index: ", movieService.readAllMovies().length);
+                if (indexDelete < 0) return;
                 movieService.deleteMovie(indexDelete);
                 System.out.println("Movie deleted successfully.");
                 break;
+
             default:
                 System.out.println("Invalid option.");
         }
@@ -141,30 +161,65 @@ public class AdminMenuHandler {
         switch (option) {
             case 1:
                 movieService.displayMovies();
-                Movie movie = movieService
-                        .readMovieByIndex(chooseIndex("Movie index: ", movieService.readAllMovies().length));
+                if (movieService.readAllMovies().length == 0) {
+                    System.out.println("No movies available.");
+                    return;
+                }
+
+                Movie movie = movieService.readMovieByIndex(
+                        chooseIndex("Movie index: ", movieService.readAllMovies().length)
+                );
+
                 int hallNo = readInt("Hall number: ");
                 int rows = readInt("Rows: ");
                 int cols = readInt("Cols: ");
+
                 Hall hall = new Hall(hallNo, rows * cols, readText("Screen type: "), rows, cols);
+
+                String date = readText("Date (YYYY-MM-DD): ");
                 String time = readText("Time (HH:mm): ");
-                Showtime showtime = new Showtime("ST-" + System.currentTimeMillis(), movie, hall, time);
+
+                Showtime showtime = new Showtime(
+                        "ST-" + System.currentTimeMillis(),
+                        movie,
+                        hall,
+                        date,
+                        time
+                );
+
                 bookingService.createShowtime(showtime);
+                System.out.println("Showtime created successfully.");
                 break;
+
             case 2:
                 bookingService.displayShowtimes();
                 break;
+
             case 3:
                 bookingService.displayShowtimes();
+                if (bookingService.readAllShowtimes().length == 0) {
+                    System.out.println("No showtimes available.");
+                    return;
+                }
                 int updateIndex = chooseIndex("Showtime index: ", bookingService.readAllShowtimes().length);
+                if (updateIndex < 0) return;
                 String newTime = readText("New time: ");
                 bookingService.updateShowtimeTime(updateIndex, newTime);
+                System.out.println("Showtime updated successfully.");
                 break;
+
             case 4:
                 bookingService.displayShowtimes();
+                if (bookingService.readAllShowtimes().length == 0) {
+                    System.out.println("No showtimes available.");
+                    return;
+                }
                 int deleteIndex = chooseIndex("Showtime index: ", bookingService.readAllShowtimes().length);
+                if (deleteIndex < 0) return;
                 bookingService.deleteShowtime(deleteIndex);
+                System.out.println("Showtime deleted successfully.");
                 break;
+
             default:
                 System.out.println("Invalid option.");
         }
@@ -177,29 +232,56 @@ public class AdminMenuHandler {
         int option = readInt("Select: ");
         switch (option) {
             case 1:
+                System.out.println("\n[Create Concession Item]");
                 concessionService.createItem(
                         new ConcessionItem(
                                 readText("Name: "),
                                 readDouble("Price: "),
-                                readInt("Stock: ")));
+                                readInt("Stock: "),
+                                readText("Category (FOOD/DRINK/SNACK): ").toUpperCase()
+                        )
+                );
+                System.out.println("Concession item created successfully.");
                 break;
+
             case 2:
                 concessionService.displayConcessions();
                 break;
+
             case 3:
                 concessionService.displayConcessions();
+                if (concessionService.readAllItems().length == 0) {
+                    System.out.println("No concession items available.");
+                    return;
+                }
+
                 int updateIndex = chooseIndex("Concession index: ", concessionService.readAllItems().length);
+                if (updateIndex < 0) return;
+
                 concessionService.updateItem(
                         updateIndex,
                         readText("New name: "),
                         readDouble("New price: "),
-                        readInt("New stock: "));
+                        readInt("New stock: "),
+                        readText("New category (FOOD/DRINK/SNACK): ").toUpperCase()
+                );
+                System.out.println("Concession updated successfully.");
                 break;
+
             case 4:
                 concessionService.displayConcessions();
+                if (concessionService.readAllItems().length == 0) {
+                    System.out.println("No concession items available.");
+                    return;
+                }
+
                 int deleteIndex = chooseIndex("Concession index: ", concessionService.readAllItems().length);
+                if (deleteIndex < 0) return;
+
                 concessionService.deleteItem(deleteIndex);
+                System.out.println("Concession deleted successfully.");
                 break;
+
             default:
                 System.out.println("Invalid option.");
         }
@@ -225,99 +307,98 @@ public class AdminMenuHandler {
                     case "ADMIN":
                         userService.createUser(new Admin(username, password, name));
                         break;
-
                     case "STAFF":
                         int staffId = readInt("Staff ID: ");
                         userService.createUser(new Staff(username, password, name, staffId));
                         break;
-
-                    case "CUSTOMER":
-                        userService.createUser(new Customer(username, password, name));
-                        break;
-
                     default:
-                        System.out.println("Invalid role!");
-                        return;
+                        userService.createUser(new Customer(username, password, name, true));
                 }
-
                 System.out.println("User created successfully.");
                 break;
+
             case 2:
                 System.out.println("\n[View Users]");
                 userService.displayUsers();
                 break;
+
             case 3:
                 System.out.println("\n[Update User Name]");
                 userService.displayUsers();
+                if (userService.readAllUsers().length == 0) {
+                    System.out.println("No users available.");
+                    return;
+                }
                 int updateIndex = chooseIndex("User index: ", userService.readAllUsers().length);
+                if (updateIndex < 0) return;
                 userService.updateUserName(updateIndex, readText("New name: "));
                 System.out.println("User updated successfully.");
                 break;
+
             case 4:
                 System.out.println("\n[Delete User]");
                 userService.displayUsers();
+                if (userService.readAllUsers().length == 0) {
+                    System.out.println("No users available.");
+                    return;
+                }
                 int deleteIndex = chooseIndex("User index: ", userService.readAllUsers().length);
+                if (deleteIndex < 0) return;
                 userService.deleteUser(deleteIndex);
                 System.out.println("User deleted successfully.");
                 break;
+
             default:
                 System.out.println("Invalid option.");
         }
     }
 
     private int readInt(String prompt) {
-        boolean validIntegerReceived = false;
-        int parsedValue = 0;
-        do {
+        while (true) {
             try {
                 System.out.print(prompt);
-                parsedValue = InputValidator.parseIntInRange(scanner.nextLine(), Integer.MIN_VALUE, Integer.MAX_VALUE);
-                validIntegerReceived = true;
+                return InputValidator.parseIntInRange(scanner.nextLine(), Integer.MIN_VALUE, Integer.MAX_VALUE);
             } catch (Exception e) {
                 System.out.println("Invalid input: " + e.getMessage());
             }
-        } while (!validIntegerReceived);
-        return parsedValue;
+        }
     }
 
     private double readDouble(String prompt) {
-        boolean validDoubleReceived = false;
-        double parsedValue = 0.0;
-        do {
+        while (true) {
             try {
                 System.out.print(prompt);
-                parsedValue = InputValidator.parsePositiveDouble(scanner.nextLine());
-                validDoubleReceived = true;
+                return InputValidator.parsePositiveDouble(scanner.nextLine());
             } catch (Exception e) {
                 System.out.println("Invalid input: " + e.getMessage());
             }
-        } while (!validDoubleReceived);
-        return parsedValue;
+        }
     }
 
     private String readText(String prompt) {
-        boolean validTextReceived = false;
-        String parsedText = "";
-        do {
+        while (true) {
             try {
                 System.out.print(prompt);
-                parsedText = InputValidator.requireText(scanner.nextLine(), "Input");
-                validTextReceived = true;
+                return InputValidator.requireText(scanner.nextLine(), "Input");
             } catch (Exception e) {
                 System.out.println("Invalid input: " + e.getMessage());
             }
-        } while (!validTextReceived);
-        return parsedText;
+        }
     }
 
-    private int chooseIndex(String prompt, int length) throws ArrayIndexOutOfBoundsException {
-        if (length <= 0) {
-            throw new ArrayIndexOutOfBoundsException("No records available.");
+    private int chooseIndex(String prompt, int length) {
+        while (true) {
+            if (length <= 0) {
+                System.out.println("No records available.");
+                return -1;
+            }
+
+            int selected = readInt(prompt) - 1;
+            if (selected >= 0 && selected < length) {
+                return selected;
+            }
+
+            System.out.println("Index out of range. Try again.");
         }
-        int selected = readInt(prompt) - 1;
-        if (selected < 0 || selected >= length) {
-            throw new ArrayIndexOutOfBoundsException("Index out of range.");
-        }
-        return selected;
     }
 }
