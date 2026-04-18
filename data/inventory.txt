@@ -12,4 +12,5 @@ Popcorn|9.0|0|SNACK
 Nachos|9.0|70|SNACK
 Chocolate Bar|3.5|200|SNACK
 Candy|2.5|0|SNACK
-Ice Cream|6.0|87|SNACK
+1st Ice Cream|6.0|87|SNACK
+&&donut|4.0|0|SNACK

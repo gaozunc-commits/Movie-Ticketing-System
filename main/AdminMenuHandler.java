@@ -13,7 +13,8 @@ import service.MovieService;
 import service.ReportService;
 import service.UserService;
 import util.InputValidator;
-
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Scanner;
 
 public class AdminMenuHandler {
@@ -44,7 +45,7 @@ public class AdminMenuHandler {
         boolean keepAdminMenuOpen = true;
         do {
             System.out.println(this);
-            int choice = readInt("Select: ");
+            int choice = readIntRange("Select: ", 0, 5);
             try {
                 switch (choice) {
                     case 1:
@@ -101,9 +102,9 @@ public class AdminMenuHandler {
     System.out.println("\n[Create Movie]");
     System.out.println("Enter movie details:");
 
-    String title = readText("Title: ");
-    String genre = readText("Genre: ");
-    int duration = readInt("Duration: ");
+    String title = readMovieTitle();
+    String genre = readGenre();
+    int duration = readDuration();
     String age = readAgeRating();
     if (age == null) return;
 
@@ -117,7 +118,7 @@ public class AdminMenuHandler {
         System.out.println("5. Confirm & Save");
         System.out.println("0. Cancel");
 
-        int edit = readInt("Select: ");
+        int edit = readIntRange("Select: ", 0, 5);
 
         switch (edit) {
             case 1:
@@ -173,7 +174,7 @@ public class AdminMenuHandler {
         System.out.println("5. Confirm Update");
         System.out.println("0. Cancel");
 
-        int edit = readInt("Select: ");
+        int edit = readIntRange("Select: ", 0, 5);
 
         switch (edit) {
             case 1:
@@ -237,10 +238,11 @@ public class AdminMenuHandler {
                     System.out.println("No movies available.");
                     return;
                 }
+                int movieIndex = chooseIndex("Movie index: ", movieService.readAllMovies().length);
+                if (movieIndex < 0) return;
 
-                Movie movie = movieService.readMovieByIndex(
-                        chooseIndex("Movie index: ", movieService.readAllMovies().length)
-                );
+            Movie movie = movieService.readMovieByIndex(movieIndex);
+              
 
                 int hallNo = readInt("Hall number: ");
                 int rows = readInt("Rows: ");
@@ -249,8 +251,8 @@ public class AdminMenuHandler {
                 Hall hall = new Hall(hallNo, rows * cols, readText("Screen type: "), rows, cols);
 
 
-                String date = readText("Date (YYYY-MM-DD): ");
-                String time = readText("Time (HH:mm): ");
+                String date = readDate();
+                String time = readTime();
 
                 Showtime showtime = new Showtime(
                         "ST-" + System.currentTimeMillis(),
@@ -328,45 +330,127 @@ private void reportMenu() {
         System.out.println("\n--- CONCESSION CRUD ---");
         System.out.println("1. Create 2. Read 3. Update 4. Delete");
 
-        int option = readInt("Select: ");
+        int option = readIntRange("Select: ", 0, 4);
         switch (option) {
+            case 0:return;
+           case 1:
+    System.out.println("\n[Create Concession Item]");
+
+    String name = readText("Name: ");
+    double price = readDoubleRange("Price: ", 0, Double.MAX_VALUE);
+    int stock = readIntRange("Stock: ", 0, Integer.MAX_VALUE);
+    String category = readCategory();
+    if (category == null) return;
+
+    while (true) {
+        System.out.println("\n=== REVIEW CONCESSION ITEM ===");
+        System.out.println("Press Number to Edit");
+        System.out.println("1. Name: " + name);
+        System.out.println("2. Price: " + price);
+        System.out.println("3. Stock: " + stock);
+        System.out.println("4. Category: " + category);
+        System.out.println("5. Confirm & Save");
+        System.out.println("0. Cancel");
+
+        int edit = readIntRange("Select: ", 0, 5);
+
+        switch (edit) {
             case 1:
-                System.out.println("\n[Create Concession Item]");
-                concessionService.createItem(
-                        new ConcessionItem(
-                                readText("Name: "),
-                                readDouble("Price: "),
-                                readInt("Stock: "),
-                                readText("Category (FOOD/DRINK/SNACK): ").toUpperCase()
-                        )
-                );
-                System.out.println("Concession item created successfully.");
+                name = readText("New Name: ");
                 break;
 
+            case 2:
+                price = readDoubleRange("New Price: ", 0, Double.MAX_VALUE);
+                break;
+
+            case 3:
+                stock = readIntRange("New Stock: ", 0, Integer.MAX_VALUE);
+                break;
+
+            case 4:
+                category = readCategory();
+                break;
+
+            case 5:
+                concessionService.createItem(
+                        new ConcessionItem(name, price, stock, category)
+                );
+                System.out.println("Concession item created successfully.");
+                return;
+
+            case 0:
+                System.out.println("Cancelled.");
+                return;
+
+            default:
+                System.out.println("Invalid option.");
+        }
+    }
             case 2:
                 concessionService.displayConcessions();
                 break;
 
             case 3:
-                concessionService.displayConcessions();
-                if (concessionService.readAllItems().length == 0) {
-                    System.out.println("No concession items available.");
-                    return;
-                }
+    System.out.println("\n[Update Concession Item]");
 
-                int updateIndex = chooseIndex("Concession index: ", concessionService.readAllItems().length);
-                if (updateIndex < 0) return;
+    concessionService.displayConcessions();
+    if (concessionService.readAllItems().length == 0) {
+        System.out.println("No concession items available.");
+        return;
+    }
 
-                concessionService.updateItem(
-                        updateIndex,
-                        readText("New name: "),
-                        readDouble("New price: "),
-                        readInt("New stock: "),
-                        readText("New category (FOOD/DRINK/SNACK): ").toUpperCase()
-                );
-                System.out.println("Concession updated successfully.");
+    int updateIndex = chooseIndex("Concession index: ", concessionService.readAllItems().length);
+    if (updateIndex < 0) return;
+
+    ConcessionItem temp = concessionService.readAllItems()[updateIndex];
+
+    String nameU = temp.getName();
+    double priceU = temp.getPrice();
+    int stockU = temp.getStock();
+    String categoryU = temp.getCategory();
+
+    while (true) {
+        System.out.println("\n=== REVIEW UPDATE CONCESSION ===");
+        System.out.println("Press Number to Edit");
+        System.out.println("1. Name: " + nameU);
+        System.out.println("2. Price: " + priceU);
+        System.out.println("3. Stock: " + stockU);
+        System.out.println("4. Category: " + categoryU);
+        System.out.println("5. Confirm Update");
+        System.out.println("0. Cancel");
+
+        int edit = readIntRange("Select: ", 0, 5);
+
+        switch (edit) {
+            case 1:
+                nameU = readText("New Name: ");
                 break;
 
+            case 2:
+                priceU = readDoubleRange("New Price: ", 0, Double.MAX_VALUE);
+                break;
+
+            case 3:
+                stockU = readIntRange("New Stock: ", 0, Integer.MAX_VALUE);
+                break;
+
+            case 4:
+                categoryU = readCategory();
+                break;
+
+            case 5:
+                concessionService.updateItem(updateIndex, nameU, priceU, stockU, categoryU);
+                System.out.println("Concession updated successfully.");
+                return;
+
+            case 0:
+                System.out.println("Cancelled.");
+                return;
+
+            default:
+                System.out.println("Invalid option.");
+        }
+    }
             case 4:
                 concessionService.displayConcessions();
                 if (concessionService.readAllItems().length == 0) {
@@ -472,7 +556,7 @@ private void reportMenu() {
             }
         }
     }
-    private int readInt(String prompt, int min, int max) {
+    private int readIntRange(String prompt, int min, int max) {
     while (true) {
         int value = readInt(prompt);
 
@@ -484,6 +568,18 @@ private void reportMenu() {
         return value;
     }
 }
+    private double readDoubleRange(String prompt, double min, double max) {
+        while (true) {
+            double value = readDouble(prompt);
+
+            if (value < min || value > max) {
+                System.out.println("Must be between " + min + " and " + max);
+                continue;
+            }
+
+            return value;
+        }
+    }
     private double readDouble(String prompt) {
         while (true) {
             try {
@@ -494,7 +590,6 @@ private void reportMenu() {
             }
         }
     }
-
     private String readText(String prompt) {
         while (true) {
             try {
@@ -505,7 +600,19 @@ private void reportMenu() {
             }
         }
     }
+    private String readCategory() {
+    while (true) {
+        String category = readText("Category (FOOD/DRINK/SNACK): ").toUpperCase();
 
+        if (category.equals("FOOD") ||
+            category.equals("DRINK") ||
+            category.equals("SNACK")) {
+            return category;
+        }
+
+        System.out.println("Invalid category! Only FOOD / DRINK / SNACK allowed.");
+    }
+}
     private int chooseIndex(String prompt, int length) {
         while (true) {
             if (length <= 0) {
@@ -531,7 +638,7 @@ private void reportMenu() {
         System.out.println("3. 18 (18+)");
         System.out.println("0. Cancel");
 
-        int choice = readInt("Choose: ", 0, 3);
+        int choice = readIntRange("Choose: ", 0, 3);
 
         switch (choice) {
             case 1: return "U";
@@ -546,23 +653,23 @@ private void reportMenu() {
     }
 }
 private int readDuration() {
-    return readInt("Duration (60–300 mins): ", 60, 300);
+    return readIntRange("Duration (60–300 mins): ", 1, 300);
 }
 private String readMovieTitle() {
     while (true) {
-        String title = readText("Title (no space/symbol): ");
+        String title = readText("Title: ");
 
-        // only letters + numbers allowed
-        if (!title.matches("[a-zA-Z0-9]+")) {
-            System.out.println("Invalid title! Only letters and numbers allowed (no space or symbol).");
+        if (title == null || title.trim().isEmpty()) {
+            System.out.println("Title cannot be empty!");
             continue;
         }
 
-
-
-        return title;
+        return title.trim();
     }
 }
+        
+    
+
 private String readGenre() {
     while (true) {
         String genre = readText("Genre: ");
@@ -580,6 +687,34 @@ private String readGenre() {
         }
 
         return genre.trim();
+    }
+}   
+private String readDate() {
+    while (true) {
+        try {
+            System.out.print("Date (YYYY-MM-DD): ");
+            String input = scanner.nextLine();
+
+            LocalDate date = LocalDate.parse(input); 
+            return date.toString();
+
+        } catch (Exception e) {
+            System.out.println("Invalid date format! Use YYYY-MM-DD.");
+        }
+    }
+}
+private String readTime() {
+    while (true) {
+        try {
+            System.out.print("Time (HH:mm): ");
+            String input = scanner.nextLine();
+
+            LocalTime time = LocalTime.parse(input); 
+            return time.toString();
+
+        } catch (Exception e) {
+            System.out.println("Invalid time format! Use HH:mm (24-hour).");
+        }
     }
 }
 }
