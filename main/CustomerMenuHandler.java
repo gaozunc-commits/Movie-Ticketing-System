@@ -39,6 +39,7 @@ public class CustomerMenuHandler {
                     case 1 -> showMoviesAndShowtimes();
                     case 2 -> placeOrder(customer);
                     case 3 -> bookingService.displayOrderReceipts();
+                    case 4 -> System.out.println("Trailer feature coming soon.");
                     case 0 -> running = false;
                     default -> System.out.println("Invalid option");
                 }
@@ -95,7 +96,7 @@ public class CustomerMenuHandler {
             // ===== CONCESSION LOOP =====
             while (true) {
                 System.out.print("Add concession? (y/n): ");
-                String ans = scanner.nextLine().trim().toLowerCase();
+                String ans = readText("").trim().toLowerCase();
 
                 if (ans.equals("n")) break;
                 if (!ans.equals("y")) {
