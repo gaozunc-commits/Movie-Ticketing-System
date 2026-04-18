@@ -94,8 +94,26 @@ public class Showtime {
 
     private int[] getSeatPosition(String seatNumber) {
         String s = seatNumber.trim().toUpperCase();
-        int row = s.charAt(0) - 'A';
-        int col = Integer.parseInt(s.substring(1)) - 1;
-        return new int[]{row, col};
-    }
+
+        if (s.length() < 2) {
+            throw new IllegalArgumentException("Invalid seat format");
+        }
+
+        char rowChar = s.charAt(0);
+        int row = rowChar - 'A';
+
+        int col;
+        try {
+            col = Integer.parseInt(s.substring(1)) - 1;
+                } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid seat number");
+        }
+
+        if (row < 0 || row >= seatMap.length ||
+            col < 0 || col >= seatMap[0].length) {
+            throw new IllegalArgumentException("Seat out of range");
+        }
+
+    return new int[]{row, col};
+}
 }
