@@ -15,4 +15,5 @@ public class Admin extends User {
         System.out.println("5. Reports");
         System.out.println("0. Logout");
     }
+    
 }

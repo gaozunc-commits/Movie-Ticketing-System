@@ -476,16 +476,26 @@ private void reportMenu() {
         System.out.println("2. View Users");
         System.out.println("3. Update User Name");
         System.out.println("4. Delete User\n");
-
+        
         int option = readInt("Choose user action: ");
+        
         switch (option) {
+            
             case 1:
+                
                 System.out.println("\n[Create User]");
-                String role = readText("Role (ADMIN/STAFF/CUSTOMER): ").toUpperCase();
-                String username = readText("Username: ");
-                String password = readText("Password: ");
+                String role = readRole();
+                String username;
+                while (true) {
+                    username = readText("Username: ");
+                    if (userService.usernameExists(username)) {
+                        System.out.println("Username already exists!");
+                    } else break;
+                }
+                username = readText("Username: ");
+                String password = readPassword();
                 String name = readText("Name: ");
-
+                
                 switch (role) {
                 case "ADMIN":
                     userService.createUser(new Admin(username, password, name));
@@ -499,6 +509,7 @@ private void reportMenu() {
                     break;
 
                 case "CUSTOMER":
+                    
                     userService.createUser(new Customer(username, password, name));
                       System.out.println("Customer created successfully.");
                     break;
@@ -715,6 +726,29 @@ private String readTime() {
         } catch (Exception e) {
             System.out.println("Invalid time format! Use HH:mm (24-hour).");
         }
+    }
+}
+private String readRole() {
+    while (true) {
+        String role = readText("Role (ADMIN/STAFF/CUSTOMER): ").toUpperCase().trim();
+
+        if (role.equals("ADMIN") ||
+            role.equals("STAFF") ||
+            role.equals("CUSTOMER")) {
+            return role;
+        }
+
+        System.out.println("Invalid role! Only ADMIN / STAFF / CUSTOMER allowed.");
+    }
+}
+private String readPassword() {
+    while (true) {
+        String pw = readText("Password (min 2 chars): ");
+        if (pw.length() < 2) {
+            System.out.println("Password too short!");
+            continue;
+        }
+        return pw;
     }
 }
 }

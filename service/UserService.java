@@ -12,58 +12,21 @@ public class UserService {
     private static final String STAFF_FILE = "data/staff.txt";
     private static final String CUSTOMER_FILE = "data/customers.txt";
 
-    private User[] users;
-    private int userCount;
+    private User[] users = new User[0];
+    private int userCount = 0;
 
     public UserService() {
-        users = new User[0];
-        userCount = 0;
         load();
 
+        // default users if empty
         if (userCount == 0) {
             createUser(new Admin("admin", "123", "System Admin"));
-            createUser(new Staff("staff", "123", "Staff One", 1001));
+            createUser(new Staff("staff", "1234567", "Staff One", 1001));
             createUser(new Customer("customer", "123", "Guest Customer"));
         }
     }
 
-    // ================= CRUD =================
-
-    public void createUser(User user) {
-        users = appendUser(users, user);
-        userCount++;
-        save();
-    }
-
-    public User[] readAllUsers() {
-        User[] copied = new User[userCount];
-        for (int i = 0; i < userCount; i++) {
-            copied[i] = users[i];
-        }
-        return copied;
-    }
-
-    public User readUserByIndex(int index) {
-        if (index < 0 || index >= userCount) {
-            throw new RuntimeException("User index out of range.");
-        }
-        return users[index];
-    }
-
-    public void updateUserName(int index, String newName) {
-        User user = readUserByIndex(index);
-        user.setName(newName);
-        save();
-    }
-
-    public void deleteUser(int index) {
-        if (index < 0 || index >= userCount) {
-            throw new RuntimeException("User index out of range.");
-        }
-        users = removeUserAt(users, index);
-        userCount--;
-        save();
-    }
+    // ================= LOGIN =================
 
     public User authenticate(String username, String password) {
         for (int i = 0; i < userCount; i++) {
@@ -71,12 +34,76 @@ public class UserService {
                 return users[i];
             }
         }
-        throw new RuntimeException("Invalid username or password.");
+        return null;
+    }
+
+    public boolean usernameExists(String username) {
+        for (int i = 0; i < userCount; i++) {
+            if (users[i].getUsername().equalsIgnoreCase(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ================= CREATE =================
+
+    public void createUser(User user) {
+        if (usernameExists(user.getUsername())) {
+            throw new RuntimeException("Username already exists!");
+        }
+
+        users = append(users, user);
+        userCount++;
+        save();
+    }
+
+    // ================= READ =================
+
+    public User[] readAllUsers() {
+        User[] copy = new User[userCount];
+        for (int i = 0; i < userCount; i++) {
+            copy[i] = users[i];
+        }
+        return copy;
+    }
+
+    public User readUserByIndex(int index) {
+        if (index < 0 || index >= userCount) {
+            throw new RuntimeException("Invalid index");
+        }
+        return users[index];
+    }
+
+    // ================= UPDATE =================
+
+    public void updateUserName(int index, String newName) {
+        User u = readUserByIndex(index);
+        u.setName(newName);
+        save();
+    }
+
+    // ================= DELETE =================
+
+    public void deleteUser(int index) {
+        User[] newArr = new User[userCount - 1];
+
+        int j = 0;
+        for (int i = 0; i < userCount; i++) {
+            if (i != index) {
+                newArr[j++] = users[i];
+            }
+        }
+
+        users = newArr;
+        userCount--;
+        save();
     }
 
     // ================= SAVE =================
 
     private void save() {
+
         String[] adminLines = new String[userCount];
         String[] staffLines = new String[userCount];
         String[] customerLines = new String[userCount];
@@ -84,27 +111,31 @@ public class UserService {
         int a = 0, s = 0, c = 0;
 
         for (int i = 0; i < userCount; i++) {
-            User user = users[i];
 
-            if (user instanceof Admin) {
+            User u = users[i];
+
+            if (u instanceof Admin) {
                 adminLines[a++] =
-                        user.getUsername() + "|" +
-                        user.getPassword() + "|" +
-                        user.getName();
+                        "ADMIN|" +
+                        u.getUsername() + "|" +
+                        u.getPassword() + "|" +
+                        u.getName();
 
-            } else if (user instanceof Staff) {
-                Staff staff = (Staff) user;
+            } else if (u instanceof Staff) {
+                Staff st = (Staff) u;
                 staffLines[s++] =
-                        user.getUsername() + "|" +
-                        user.getPassword() + "|" +
-                        user.getName() + "|" +
-                        staff.getStaffId();
+                        "STAFF|" +
+                        st.getUsername() + "|" +
+                        st.getPassword() + "|" +
+                        st.getName() + "|" +
+                        st.getStaffId();
 
-            } else if (user instanceof Customer) {
+            } else if (u instanceof Customer) {
                 customerLines[c++] =
-                        user.getUsername() + "|" +
-                        user.getPassword() + "|" +
-                        user.getName();
+                        "CUSTOMER|" +
+                        u.getUsername() + "|" +
+                        u.getPassword() + "|" +
+                        u.getName();
             }
         }
 
@@ -122,105 +153,92 @@ public class UserService {
     }
 
     private void loadAdmins() {
-    String[] lines = FileHandler.readFromFile(ADMIN_FILE);
+        String[] lines = FileHandler.readFromFile(ADMIN_FILE);
 
-    for (String line : lines) {
-        try {
-            String[] p = line.split("\\|");
-
-            if (p.length >= 3) {
-                users = appendUser(users,
-                        new Admin(p[1], p[2], p[3]));
-                userCount++;
-            }
-        } catch (Exception e) {
-            System.out.println("Invalid admin record: " + line);
-        }
-    }
-}
-
-   private void loadStaff() {
-    String[] lines = FileHandler.readFromFile(STAFF_FILE);
-
-    for (String line : lines) {
-        try {
+        for (String line : lines) {
             String[] p = line.split("\\|");
 
             if (p.length >= 4) {
-                users = appendUser(users,
-                        new Staff(p[1], p[2], p[3], Integer.parseInt(p[4])));
+                users = append(users,
+                        new Admin(
+                                p[1], // username
+                                p[2], // password
+                                p[3]  // name
+                        ));
                 userCount++;
             }
-        } catch (Exception e) {
-            System.out.println("Invalid staff record: " + line);
         }
     }
-}
 
-   private void loadCustomers() {
-    String[] lines = FileHandler.readFromFile(CUSTOMER_FILE);
+    private void loadStaff() {
+        String[] lines = FileHandler.readFromFile(STAFF_FILE);
 
-    for (String line : lines) {
-        try {
-            String[] p = line.trim().split("\\|");
+        for (String line : lines) {
+            String[] p = line.split("\\|");
 
-            if (p.length >= 3) {
-                users = appendUser(users,
-                        new Customer(p[1], p[2], p[3]));
+            if (p.length >= 5) {
+                users = append(users,
+                        new Staff(
+                                p[1],
+                                p[2],
+                                p[3],
+                                Integer.parseInt(p[4])
+                        ));
                 userCount++;
             }
-        } catch (Exception e) {
-            System.out.println("Invalid customer record: " + line);
         }
     }
-}
 
-    // ================= HELPER =================
+    private void loadCustomers() {
+        String[] lines = FileHandler.readFromFile(CUSTOMER_FILE);
+
+        for (String line : lines) {
+            String[] p = line.split("\\|");
+
+            if (p.length >= 4) {
+                users = append(users,
+                        new Customer(
+                                p[1],
+                                p[2],
+                                p[3]
+                        ));
+                userCount++;
+            }
+        }
+    }
+
+    // ================= HELPERS =================
+
+    private User[] append(User[] arr, User u) {
+        User[] newArr = new User[arr.length + 1];
+        for (int i = 0; i < arr.length; i++) {
+            newArr[i] = arr[i];
+        }
+        newArr[arr.length] = u;
+        return newArr;
+    }
 
     private String[] trim(String[] arr, int size) {
-        String[] result = new String[size];
+        String[] res = new String[size];
         for (int i = 0; i < size; i++) {
-            result[i] = arr[i];
+            res[i] = arr[i];
         }
-        return result;
-    }
-
-    private User[] appendUser(User[] source, User user) {
-        User[] expanded = new User[source.length + 1];
-        for (int i = 0; i < source.length; i++) {
-            expanded[i] = source[i];
-        }
-        expanded[source.length] = user;
-        return expanded;
-    }
-
-    private User[] removeUserAt(User[] source, int index) {
-        User[] reduced = new User[source.length - 1];
-        int target = 0;
-        for (int i = 0; i < source.length; i++) {
-            if (i != index) {
-                reduced[target++] = source[i];
-            }
-        }
-        return reduced;
+        return res;
     }
 
     // ================= DISPLAY =================
 
     public void displayUsers() {
-        System.out.println("\n------------------------------------------------------------");
-        System.out.printf("%-5s %-15s %-12s %-20s%n", "No", "Username", "Role", "Name");
-        System.out.println("------------------------------------------------------------");
+        System.out.println("\nNo | Username | Role | Name");
+        System.out.println("--------------------------------");
 
         for (int i = 0; i < userCount; i++) {
             User u = users[i];
-            System.out.printf("%-5d %-15s %-12s %-20s%n",
+            System.out.printf("%d | %s | %s | %s%n",
                     i + 1,
                     u.getUsername(),
                     u.getRole(),
                     u.getName());
         }
-
-        System.out.println("------------------------------------------------------------");
     }
 }
