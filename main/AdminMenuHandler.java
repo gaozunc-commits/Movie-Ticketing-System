@@ -91,6 +91,7 @@ public class AdminMenuHandler {
         System.out.println("2. View Movies");
         System.out.println("3. Update Movie");
         System.out.println("4. Delete Movie");
+        System.out.println("0. Back"); 
         System.out.println("============================================================");
 
         int option = readInt("Choose movie action: ");
@@ -145,6 +146,9 @@ public class AdminMenuHandler {
                 movieService.deleteMovie(indexDelete);
                 System.out.println("Movie deleted successfully.");
                 break;
+
+                case 0:
+                return;
 
             default:
                 System.out.println("Invalid option.");
