@@ -1,0 +1,2 @@
+CUSTOMER|customer|123|Guest Customer
+CUSTOMER|lyk|123|shuaige
