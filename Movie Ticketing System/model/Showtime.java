@@ -4,69 +4,71 @@ public class Showtime {
     private String showtimeId;
     private Movie movie;
     private Hall hall;
-    private String date;   // ✅ 新增
     private String time;
     private boolean[][] seatMap;
 
-    public Showtime(String showtimeId, Movie movie, Hall hall, String date, String time) {
+    // Parameterized constructor to initialize showtime details and seats.
+    public Showtime(String showtimeId, Movie movie, Hall hall, String time) throws ArrayIndexOutOfBoundsException {
         setShowtimeId(showtimeId);
         setMovie(movie);
         setHall(hall);
-        setDate(date);
         setTime(time);
-
         this.seatMap = new boolean[hall.getSeatMap().length][hall.getSeatMap()[0].length];
     }
 
+    // Getter for showtime ID.
     public String getShowtimeId() {
         return showtimeId;
     }
 
+    // Setter for showtime ID with validation.
     public void setShowtimeId(String showtimeId) {
         if (showtimeId == null || showtimeId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Showtime ID cannot be empty");
+            throw new ArrayIndexOutOfBoundsException("Showtime ID cannot be empty.");
         }
         this.showtimeId = showtimeId.trim();
     }
 
+    // Getter for movie associated with the showtime.
     public Movie getMovie() {
         return movie;
     }
 
+    // Setter for associated movie with validation.
     public void setMovie(Movie movie) {
-        if (movie == null) throw new IllegalArgumentException("Movie cannot be null");
+        if (movie == null) {
+            throw new ArrayIndexOutOfBoundsException("Showtime must reference a valid movie.");
+        }
         this.movie = movie;
     }
 
+    // Getter for hall associated with the showtime.
     public Hall getHall() {
         return hall;
     }
 
+    // Setter for associated hall with validation.
     public void setHall(Hall hall) {
-        if (hall == null) throw new IllegalArgumentException("Hall cannot be null");
+        if (hall == null || hall.getSeatMap() == null || hall.getSeatMap().length == 0 || hall.getSeatMap()[0].length == 0) {
+            throw new ArrayIndexOutOfBoundsException("Showtime must reference a valid hall.");
+        }
         this.hall = hall;
     }
 
-    public String getDate() {   // ✅ 新增
-        return date;
-    }
-
-    public void setDate(String date) {
-        if (date == null || date.trim().isEmpty())
-            throw new IllegalArgumentException("Date cannot be empty");
-        this.date = date.trim();
-    }
-
+    // Getter for showtime clock value.
     public String getTime() {
         return time;
     }
 
+    // Setter for showtime clock value with validation.
     public void setTime(String time) {
-        if (time == null || time.trim().isEmpty())
-            throw new IllegalArgumentException("Time cannot be empty");
+        if (time == null || time.trim().isEmpty()) {
+            throw new ArrayIndexOutOfBoundsException("Showtime time cannot be empty.");
+        }
         this.time = time.trim();
     }
 
+    // Getter for booking state map.
     public boolean[][] getSeatMap() {
         return seatMap;
     }
@@ -76,26 +78,57 @@ public class Showtime {
     }
 
     public String getSeatType(String seatNumber) {
-        int[] pos = getSeatPosition(seatNumber);
-        return hall.getSeatMap()[pos[0]][pos[1]];
+        int[] position = getSeatPosition(seatNumber);
+        return hall.getSeatMap()[position[0]][position[1]];
     }
 
-    public synchronized boolean bookSeat(String seatNumber) {
-        int[] pos = getSeatPosition(seatNumber);
-        if (seatMap[pos[0]][pos[1]]) return false;
-        seatMap[pos[0]][pos[1]] = true;
+    public boolean bookSeat(String seatNumber) {
+        int[] position = getSeatPosition(seatNumber);
+        int row = position[0];
+        int col = position[1];
+        if (seatMap[row][col]) {
+            System.out.println("Seat already booked.");
+            return false;
+        }
+        seatMap[row][col] = true;
         return true;
     }
 
-    public synchronized void releaseSeat(String seatNumber) {
-        int[] pos = getSeatPosition(seatNumber);
-        seatMap[pos[0]][pos[1]] = false;
+    public void releaseSeat(String seatNumber) {
+        int[] position = getSeatPosition(seatNumber);
+        seatMap[position[0]][position[1]] = false;
     }
 
     private int[] getSeatPosition(String seatNumber) {
-        String s = seatNumber.trim().toUpperCase();
-        int row = s.charAt(0) - 'A';
-        int col = Integer.parseInt(s.substring(1)) - 1;
-        return new int[]{row, col};
+        if (seatNumber == null || seatNumber.length() < 2) {
+            throw new ArrayIndexOutOfBoundsException("Seat format must be like A1.");
+        }
+        String normalized = seatNumber.trim().toUpperCase();
+        int row = normalized.charAt(0) - 'A';
+        int col = Integer.parseInt(normalized.substring(1)) - 1;
+
+        if (row < 0 || row >= seatMap.length || col < 0 || col >= seatMap[0].length) {
+            throw new ArrayIndexOutOfBoundsException("Seat is out of hall range.");
+        }
+        return new int[] { row, col };
+    }
+
+    public String toString() {
+        return String.format("%s | %-20s | Hall %-3d | %s", showtimeId, movie.getTitle(), hall.getHallNumber(), time);
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Showtime)) {
+            return false;
+        }
+        Showtime other = (Showtime) obj;
+        return showtimeId == null ? other.showtimeId == null : showtimeId.equals(other.showtimeId);
+    }
+
+    public int hashCode() {
+        return 31 + (showtimeId == null ? 0 : showtimeId.hashCode());
     }
 }

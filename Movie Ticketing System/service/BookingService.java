@@ -37,7 +37,6 @@ public class BookingService {
     }
 
     public Showtime[] readAllShowtimes() {
-        sortShowtimes();
         Showtime[] copied = new Showtime[showtimeCount];
         for (int i = 0; i < showtimeCount; i++) {
             copied[i] = showtimes[i];
@@ -140,173 +139,74 @@ public class BookingService {
     }
 
     private void saveShowtimes() {
-    String[] lines = new String[showtimeCount];
-
-    for (int i = 0; i < showtimeCount; i++) {
-        Showtime s = showtimes[i];
-
-        StringBuilder seatData = new StringBuilder();
-        boolean[][] seats = s.getSeatMap();
-
-        for (int r = 0; r < seats.length; r++) {
-            for (int c = 0; c < seats[r].length; c++) {
-                seatData.append(seats[r][c] ? "1" : "0").append(",");
-            }
+        String[] lines = new String[showtimeCount];
+        for (int i = 0; i < showtimeCount; i++) {
+            Showtime showtime = showtimes[i];
+            lines[i] = showtime.getShowtimeId() + "|" + showtime.getMovie().getTitle() + "|" + showtime.getHall().getHallNumber() + "|" + showtime.getTime() + "|" + showtime.getHall().getCapacity() + "|" + showtime.getHall().getScreenType() + "|" + showtime.getSeatMap().length + "|" + showtime.getSeatMap()[0].length;
         }
-
-        lines[i] =
-            s.getShowtimeId() + "|" +
-            s.getMovie().getTitle() + "|" +
-            s.getHall().getHallNumber() + "|" +
-            s.getDate() + "|" +
-            s.getTime() + "|" +
-            s.getHall().getCapacity() + "|" +
-            s.getHall().getScreenType() + "|" +
-            s.getSeatMap().length + "|" +
-            s.getSeatMap()[0].length + "|" +
-            seatData;
+        FileHandler.overwriteFile(SHOWTIME_FILE, lines);
     }
 
-    FileHandler.overwriteFile(SHOWTIME_FILE, lines);
-}
-
-   private void loadShowtimes(MovieService movieService) {
-
-    showtimes = new Showtime[0];
-    showtimeCount = 0;
-
-    String[] lines = FileHandler.readFromFile(SHOWTIME_FILE);
-    Movie[] movies = movieService.readAllMovies();
-
-    for (String line : lines) {
-        try {
-            String[] p = line.split("\\|");
-
-            Movie movie = null;
-            for (Movie m : movies) {
-                if (m.getTitle().equalsIgnoreCase(p[1])) {
-                    movie = m;
-                    break;
+    private void loadShowtimes(MovieService movieService) {
+        showtimes = new Showtime[0];
+        showtimeCount = 0;
+        String[] lines = FileHandler.readFromFile(SHOWTIME_FILE);
+        Movie[] movies = movieService.readAllMovies();
+        for (String line : lines) {
+            try {
+                String[] parts = line.split("\\|");
+                if (parts.length < 8) {
+                    continue;
                 }
-            }
-
-            if (movie == null) continue;
-
-            Hall hall = new Hall(
-                Integer.parseInt(p[2]),
-                Integer.parseInt(p[5]),
-                p[6],
-                Integer.parseInt(p[7]),
-                Integer.parseInt(p[8])
-            );
-
-            Showtime s = new Showtime(
-                p[0],
-                movie,
-                hall,
-                p[3], // date
-                p[4]  // time
-            );
-
-            // restore seat
-            String[] seatData = p[9].split(",");
-            boolean[][] seats = s.getSeatMap();
-
-            int k = 0;
-            for (int r = 0; r < seats.length; r++) {
-                for (int c = 0; c < seats[r].length; c++) {
-                    if (k < seatData.length) {
-                        seats[r][c] = "1".equals(seatData[k]);
-                        k++;
+                Movie movie = null;
+                for (Movie m : movies) {
+                    if (m.getTitle().equalsIgnoreCase(parts[1])) {
+                        movie = m;
+                        break;
                     }
                 }
-            }
-
-            showtimes = appendShowtime(showtimes, s);
-            showtimeCount++;
-
-        } catch (Exception e) {
-            System.out.println("Skip invalid showtime: " + line);
-        }
-    }
-}
-
-   private void loadOrders() {
-    orders = new Order[0];
-    orderCount = 0;
-
-    String[] lines = FileHandler.readFromFile(ORDER_FILE);
-
-    java.util.HashMap<String, Order> map = new java.util.HashMap<>();
-
-    for (String line : lines) {
-        try {
-            String[] parts = line.split("\\|");
-
-            if (parts.length < 4) continue;
-
-            String orderId = parts[0];
-            String username = parts[1];
-            String showtimeId = parts[2];
-            String type = parts[3];
-
-            Order order = map.get(orderId);
-
-            if (order == null) {
-                order = new Order(orderId, username, showtimeId);
-                map.put(orderId, order);
-            }
-            if ("TICKET".equals(type)) {
-                String seat = parts[5];
-
-                Ticket t = new StandardTicket(seat);
-                order.addTicket(t);
-            }
-            else if ("SNACK".equals(type)) {
-                String name = parts[4];
-                int qty = Integer.parseInt(parts[5]);
-                double price = Double.parseDouble(parts[6]);
-
-                ConcessionItem item = new ConcessionItem(name, price, qty, "SNACK");
-                order.addConcessionItem(item, qty);
-            }
-
-            else if ("TOTAL".equals(type)) {
-                if (parts.length >= 5)
-                    order.setTotalPrice(Double.parseDouble(parts[4]));
-
-                if (parts.length >= 6)
-                    order.setPaymentMethod(parts[5]);
-
-                if (parts.length >= 7)
-                    order.setPurchasedAt(parts[6]);
-            }
-
-        } catch (Exception e) {
-            System.out.println("Skipping invalid order record: " + line);
-        }
-    }
-
-    for (Order o : map.values()) {
-        orders = appendOrder(orders, o);
-        orderCount++;
-    }
-}
-    private void sortShowtimes() {
-    for (int i = 0; i < showtimeCount - 1; i++) {
-        for (int j = i + 1; j < showtimeCount; j++) {
-
-            String dateTime1 = showtimes[i].getDate() + " " + showtimes[i].getTime();
-            String dateTime2 = showtimes[j].getDate() + " " + showtimes[j].getTime();
-
-            if (dateTime1.compareTo(dateTime2) > 0) {
-                Showtime temp = showtimes[i];
-                showtimes[i] = showtimes[j];
-                showtimes[j] = temp;
+                if (movie == null) {
+                    continue;
+                }
+                Hall hall = new Hall(Integer.parseInt(parts[2]), Integer.parseInt(parts[4]), parts[5], Integer.parseInt(parts[6]), Integer.parseInt(parts[7]));
+                showtimes = appendShowtime(showtimes, new Showtime(parts[0], movie, hall, parts[3]));
+                showtimeCount++;
+            } catch (Exception e) {
+                System.out.println("Skipping invalid showtime record: " + line);
             }
         }
     }
-}
+
+    private void loadOrders() {
+        orders = new Order[0];
+        orderCount = 0;
+        String[] lines = FileHandler.readFromFile(ORDER_FILE);
+        for (String line : lines) {
+            try {
+                String[] parts = line.split("\\|");
+                if (parts.length < 4) {
+                    continue;
+                }
+                if ("TOTAL".equals(parts[3])) {
+                    Order loadedOrder = new Order(parts[0], parts[1], parts[2]);
+                    if (parts.length >= 5) {
+                        loadedOrder.setTotalPrice(Double.parseDouble(parts[4]));
+                    }
+                    if (parts.length >= 6) {
+                        loadedOrder.setPaymentMethod(parts[5]);
+                    }
+                    if (parts.length >= 7) {
+                        loadedOrder.setPurchasedAt(parts[6]);
+                    }
+                    orders = appendOrder(orders, loadedOrder);
+                    orderCount++;
+                }
+            } catch (Exception e) {
+                System.out.println("Skipping invalid order record: " + line);
+            }
+        }
+    }
+
     private boolean showtimeExists(String showtimeId) {
         for (int i = 0; i < showtimeCount; i++) {
             if (showtimes[i].getShowtimeId().equalsIgnoreCase(showtimeId)) {
@@ -349,8 +249,7 @@ public class BookingService {
     public void displayShowtimes() {
         Showtime[] allShowtimes = readAllShowtimes();
         System.out.println("\n--------------------------------------------------------------------------------");
-        System.out.printf("%-5s %-25s %-10s %-12s %-10s %-20s%n",
-"No.", "Movie", "Hall", "Date", "Time", "Showtime ID");
+        System.out.printf("%-5s %-25s %-10s %-10s %-20s%n", "No.", "Movie", "Hall", "Time", "Showtime ID");
         System.out.println("--------------------------------------------------------------------------------");
         if (allShowtimes.length == 0) {
             System.out.println("No showtimes available.");
@@ -359,17 +258,10 @@ public class BookingService {
         }
         for (int i = 0; i < allShowtimes.length; i++) {
             Showtime s = allShowtimes[i];
-           String hallLabel = "Hall " + s.getHall().getHallNumber();
-
-System.out.printf("%-5d %-25s %-10s %-12s %-10s %-20s%n",
-i + 1,
-s.getMovie().getTitle(),
-hallLabel,
-s.getDate(),
-s.getTime(),
-s.getShowtimeId());
-        System.out.println("--------------------------------------------------------------------------------");
+            String hallLabel = "Hall " + s.getHall().getHallNumber();
+            System.out.printf("%-5d %-25s %-10s %-10s %-20s%n", i + 1, s.getMovie().getTitle(), hallLabel, s.getTime(), s.getShowtimeId());
         }
+        System.out.println("--------------------------------------------------------------------------------");
     }
 
     public void displayOrderReceipts() {
@@ -393,7 +285,4 @@ s.getShowtimeId());
         System.out.println("Status        : PAID");
         System.out.println("========================================");
     }
-    public void persistShowtimes() {
-    saveShowtimes();
-}
 }

@@ -48,53 +48,27 @@ public class Main {
         return user;
     }
 
-   
-
-   private static void initializeSampleData() {
-    if (MOVIE_SERVICE.readAllMovies().length == 0) {
-        MOVIE_SERVICE.createMovie(new Movie("Avengers Reassembled", "Action", 132, "PG13"));
-        MOVIE_SERVICE.createMovie(new Movie("Ocean Echo", "Sci-Fi", 118, "PG"));
-    }
-
-    if (BOOKING_SERVICE.readAllShowtimes().length == 0) {
-        Movie[] movies = MOVIE_SERVICE.readAllMovies();
-
-        if (movies.length > 0) {
-            Hall hall1 = new Hall(1, 40, "IMAX", 5, 8);
-            Hall hall2 = new Hall(2, 30, "Standard", 5, 6);
-
-            BOOKING_SERVICE.createShowtime(
-                new Showtime(
-                    "ST-1001",
-                    movies[0],
-                    hall1,
-                    "2026-04-16",
-                    "14:00"
-                )
-            );
-
-            BOOKING_SERVICE.createShowtime(
-                new Showtime(
-                    "ST-1002",
-                    movies[0],
-                    hall2,
-                    "2026-04-16",
-                    "20:00"
-                )
-            );
-
-            if (movies.length > 1) {
-                BOOKING_SERVICE.createShowtime(
-                    new Showtime(
-                        "ST-1003",
-                        movies[1],
-                        hall2,
-                        "2026-04-16",
-                        "16:30"
-                    )
-                );
+    private static void initializeSampleData() {
+        if (MOVIE_SERVICE.readAllMovies().length == 0) {
+            MOVIE_SERVICE.createMovie(new Movie("Avengers Reassembled", "Action", 132, "PG13"));
+            MOVIE_SERVICE.createMovie(new Movie("Ocean Echo", "Sci-Fi", 118, "PG"));
+        }
+        if (CONCESSION_SERVICE.readAllItems().length == 0) {
+            CONCESSION_SERVICE.createItem(new ConcessionItem("Popcorn", 8.5, 100));
+            CONCESSION_SERVICE.createItem(new ConcessionItem("Cola", 5.0, 120));
+            CONCESSION_SERVICE.createItem(new ConcessionItem("Combo Set", 12.0, 80));
+        }
+        if (BOOKING_SERVICE.readAllShowtimes().length == 0) {
+            Movie[] movies = MOVIE_SERVICE.readAllMovies();
+            if (movies.length > 0) {
+                Hall hall1 = new Hall(1, 40, "IMAX", 5, 8);
+                Hall hall2 = new Hall(2, 30, "Standard", 5, 6);
+                BOOKING_SERVICE.createShowtime(new Showtime("ST-1001", movies[0], hall1, "14:00"));
+                BOOKING_SERVICE.createShowtime(new Showtime("ST-1002", movies[0], hall2, "20:00"));
+                if (movies.length > 1) {
+                    BOOKING_SERVICE.createShowtime(new Showtime("ST-1003", movies[1], hall2, "16:30"));
+                }
             }
         }
     }
 }
-    }

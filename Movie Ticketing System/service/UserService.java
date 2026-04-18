@@ -20,7 +20,7 @@ public class UserService {
             userCount++;
             users = appendUser(users, new Staff("staff", "123", "Staff One", 1001));
             userCount++;
-            users = appendUser(users, new Customer("customer", "123", "Guest Customer", true));
+            users = appendUser(users, new Customer("customer", "123", "Guest Customer"));
             userCount++;
             save();
         }
@@ -82,7 +82,7 @@ public class UserService {
                 lines[i] = "STAFF|" + user.getUsername() + "|" + user.getPassword() + "|" + user.getName() + "|" + staff.getStaffId();
             } else if (user instanceof Customer) {
                 Customer customer = (Customer) user;
-                lines[i] = "CUSTOMER|" + user.getUsername() + "|" + user.getPassword() + "|" + user.getName() + "|" + customer.isLoyaltyMember() + "|" + customer.getLoyaltyPoints();
+                lines[i] = "CUSTOMER|" + user.getUsername() + "|" + user.getPassword() + "|" + user.getName();
             }
         }
         FileHandler.overwriteFile(FILE_PATH, lines);
@@ -102,9 +102,7 @@ public class UserService {
                     users = appendUser(users, new Staff(parts[1], parts[2], parts[3], Integer.parseInt(parts[4])));
                     userCount++;
                 } else if (parts[0].equals("CUSTOMER") && parts.length >= 6) {
-                    Customer customer = new Customer(parts[1], parts[2], parts[3], Boolean.parseBoolean(parts[4]));
-                    int points = Integer.parseInt(parts[5]);
-                    customer.addLoyaltyPoints(points);
+                    Customer customer = new Customer(parts[1], parts[2], parts[3]);
                     users = appendUser(users, customer);
                     userCount++;
                 }

@@ -44,29 +44,17 @@ public class Order {
         totalPrice += ticket.calculatePrice();
     }
 
-    public void addConcessionItem(ConcessionItem item, int quantity)
-        throws ArrayIndexOutOfBoundsException {
-
-    if (item == null) {
-        throw new ArrayIndexOutOfBoundsException("Concession item cannot be null.");
+    public void addConcessionItem(ConcessionItem item, int quantity) throws ArrayIndexOutOfBoundsException {
+        if (item == null) {
+            throw new ArrayIndexOutOfBoundsException("Concession item cannot be null.");
+        }
+        if (quantity <= 0) {
+            throw new ArrayIndexOutOfBoundsException("Quantity must be positive.");
+        }
+        concessionItems = appendConcessionItem(concessionItems, new ConcessionItem(item.getName(), item.getPrice(), quantity));
+        concessionItemCount++;
+        totalPrice += item.getPrice() * quantity;
     }
-
-    if (quantity <= 0) {
-        throw new ArrayIndexOutOfBoundsException("Quantity must be positive.");
-    }
-
-    ConcessionItem orderedItem = new ConcessionItem(
-            item.getName(),
-            item.getPrice(),
-            quantity,
-            item.getCategory()
-    );
-
-    concessionItems = appendConcessionItem(concessionItems, orderedItem);
-    concessionItemCount++;
-
-    totalPrice += item.getPrice() * quantity;
-}
 
     // Getter for order ID.
     public String getOrderId() {

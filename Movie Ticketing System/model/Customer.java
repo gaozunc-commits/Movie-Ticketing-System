@@ -1,14 +1,10 @@
 package model;
 
 public class Customer extends User {
-    private boolean loyaltyMember;
-    private int loyaltyPoints;
 
     // Parameterized constructor for customer user creation.
-    public Customer(String username, String password, String name, boolean loyaltyMember) {
+    public Customer(String username, String password, String name) {
         super(username, password, name, "CUSTOMER");
-        this.loyaltyMember = loyaltyMember;
-        this.loyaltyPoints = 0;
     }
 
     public void displayMenu() {
@@ -19,24 +15,4 @@ public class Customer extends User {
         System.out.println("0. Logout");
     }
 
-    // Getter for loyalty membership status.
-    public boolean isLoyaltyMember() {
-        return loyaltyMember;
-    }
-
-    // Setter for loyalty membership status.
-    public void setLoyaltyMember(boolean loyaltyMember) {
-        this.loyaltyMember = loyaltyMember;
-    }
-
-    // Getter for current loyalty points.
-    public int getLoyaltyPoints() {
-        return loyaltyPoints;
-    }
-
-    public void addLoyaltyPoints(int points) {
-        if (points > 0) {
-            this.loyaltyPoints += points;
-        }
-    }
 }

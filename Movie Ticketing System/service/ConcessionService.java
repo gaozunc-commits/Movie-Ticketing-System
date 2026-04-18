@@ -34,14 +34,21 @@ public class ConcessionService {
         }
         return items[index];
     }
-public void updateItem(int index, String name, double price, int stock, String category) {
-    ConcessionItem item = readItemByIndex(index);
-    item.setName(name);
-    item.setPrice(price);
-    item.setStock(stock);
-    item.setCategory(category);
-    save();
-}
+
+    public void updateItem(int index, String name, double price, int stock) {
+        ConcessionItem item = readItemByIndex(index);
+        item.setName(name);
+        item.setPrice(price);
+        item.setStock(stock);
+        save();
+    }
+
+    public void updateStock(int index, int stock) {
+        ConcessionItem item = readItemByIndex(index);
+        item.setStock(stock);
+        save();
+    }
+
     public void addStock(int index, int quantityToAdd) {
         if (quantityToAdd <= 0) {
             throw new ArrayIndexOutOfBoundsException("Stock to add must be positive.");
@@ -73,10 +80,7 @@ public void updateItem(int index, String name, double price, int stock, String c
         String[] lines = new String[itemCount];
         for (int i = 0; i < itemCount; i++) {
             ConcessionItem item = items[i];
-            lines[i] = item.getName() + "|"
-                    + item.getPrice() + "|"
-                    + item.getStock() + "|"
-                    + item.getCategory();
+            lines[i] = item.getName() + "|" + item.getPrice() + "|" + item.getStock();
         }
         FileHandler.overwriteFile(FILE_PATH, lines);
     }
@@ -84,55 +88,18 @@ public void updateItem(int index, String name, double price, int stock, String c
     private void load() {
         items = new ConcessionItem[0];
         itemCount = 0;
-
         String[] lines = FileHandler.readFromFile(FILE_PATH);
         for (String line : lines) {
             try {
                 String[] parts = line.split("\\|");
-                if (parts.length != 4) continue;
-
-                ConcessionItem item = new ConcessionItem(
-                        parts[0],
-                        Double.parseDouble(parts[1]),
-                        Integer.parseInt(parts[2]),
-                        parts[3]
-                );
-
-                items = appendItem(items, item);
+                if (parts.length != 3) {
+                    continue;
+                }
+                items = appendItem(items, new ConcessionItem(parts[0], Double.parseDouble(parts[1]), Integer.parseInt(parts[2])));
                 itemCount++;
-
             } catch (Exception e) {
                 System.out.println("Skipping invalid concession record: " + line);
             }
-        }
-    }
-
-    // FINAL DISPLAY (ONLY ONE VERSION)
-    public void displayConcessions() {
-        ConcessionItem[] allItems = readAllItems();
-
-        System.out.println("\n================ CONCESSION MENU ================");
-
-        printCategory(allItems, "FOOD");
-        printCategory(allItems, "DRINK");
-        printCategory(allItems, "SNACK");
-
-        System.out.println("=================================================");
-    }
-
-    private void printCategory(ConcessionItem[] items, String category) {
-        System.out.println("\n--- " + category + " ---");
-
-        int count = 0;
-        for (int i = 0; i < items.length; i++) {
-            if (items[i].getCategory().equalsIgnoreCase(category)) {
-                System.out.printf("%d. %s%n", i + 1, items[i].toString());
-                count++;
-            }
-        }
-
-        if (count == 0) {
-            System.out.println("No items available.");
         }
     }
 
@@ -149,9 +116,28 @@ public void updateItem(int index, String name, double price, int stock, String c
         ConcessionItem[] reduced = new ConcessionItem[source.length - 1];
         int target = 0;
         for (int i = 0; i < source.length; i++) {
-            if (i == index) continue;
+            if (i == index) {
+                continue;
+            }
             reduced[target++] = source[i];
         }
         return reduced;
+    }
+
+    public void displayConcessions() {
+        ConcessionItem[] allItems = readAllItems();
+        System.out.println("\n----------------------------------------------------------------");
+        System.out.printf("%-5s %-22s %-12s %-10s%n", "No.", "Item", "Price (RM)", "Stock");
+        System.out.println("----------------------------------------------------------------");
+        if (allItems.length == 0) {
+            System.out.println("No concession items available.");
+            System.out.println("----------------------------------------------------------------");
+            return;
+        }
+        for (int i = 0; i < allItems.length; i++) {
+            ConcessionItem item = allItems[i];
+            System.out.printf("%-5d %-22s %-12.2f %-10d%n", i + 1, item.getName(), item.getPrice(), item.getStock());
+        }
+        System.out.println("----------------------------------------------------------------");
     }
 }
