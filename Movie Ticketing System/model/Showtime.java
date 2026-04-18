@@ -4,7 +4,7 @@ public class Showtime {
     private String showtimeId;
     private Movie movie;
     private Hall hall;
-    private String date;   // ✅ 新增
+    private String date;   
     private String time;
     private boolean[][] seatMap;
 
@@ -47,7 +47,7 @@ public class Showtime {
         this.hall = hall;
     }
 
-    public String getDate() {   // ✅ 新增
+    public String getDate() {  
         return date;
     }
 

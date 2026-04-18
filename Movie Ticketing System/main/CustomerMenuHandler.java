@@ -39,7 +39,6 @@ public class CustomerMenuHandler {
                     case 1 -> showMoviesAndShowtimes();
                     case 2 -> placeOrder(customer);
                     case 3 -> bookingService.displayOrderReceipts();
-                    case 4 -> showTrailers();
                     case 0 -> running = false;
                     default -> System.out.println("Invalid option");
                 }
@@ -143,7 +142,6 @@ public class CustomerMenuHandler {
             Payment payment = paymentService.processPaymentByChoice(order.getTotalPrice(), scanner);
             order.setPaymentMethod(payment.getMethod());
 
-            customer.addLoyaltyPoints((int) Math.ceil(order.getTotalPrice()));
 
             bookingService.persistOrder(order);
 
@@ -179,20 +177,7 @@ public class CustomerMenuHandler {
         bookingService.displayShowtimes();
     }
 
-    private void showTrailers() {
-        String[] t = util.FileHandler.readFromFile("data/trailers.txt");
-
-        System.out.println("\n--- TRAILERS ---");
-
-        if (t.length == 0) {
-            System.out.println("No trailers.");
-            return;
-        }
-
-        for (String x : t) {
-            System.out.println("- " + x);
-        }
-    }
+   
 
     private int readInt(String msg) {
         while (true) {

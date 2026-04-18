@@ -312,7 +312,7 @@ public class AdminMenuHandler {
                         userService.createUser(new Staff(username, password, name, staffId));
                         break;
                     default:
-                        userService.createUser(new Customer(username, password, name, true));
+                        userService.createUser(new Customer(username, password, name));
                 }
                 System.out.println("User created successfully.");
                 break;
