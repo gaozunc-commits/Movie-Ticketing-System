@@ -492,7 +492,6 @@ private void reportMenu() {
                         System.out.println("Username already exists!");
                     } else break;
                 }
-                username = readText("Username: ");
                 String password = readPassword();
                 String name = readText("Name: ");
                 
