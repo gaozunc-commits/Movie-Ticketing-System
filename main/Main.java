@@ -73,13 +73,40 @@ public class Main {
         return user;
     }
 private static int showMainMenu() {
-    System.out.println("\n=== CINEMA SYSTEM ===");
-    System.out.println("1. Admin Login");
-    System.out.println("2. Staff Login");
-    System.out.println("3. Customer Login");
-    System.out.println("0. Exit");
-    System.out.print("Choose: ");
-    return Integer.parseInt(SCANNER.nextLine());
+    while (true) {
+        System.out.println("\n=== CINEMA SYSTEM ===");
+        System.out.println("1. Admin Login");
+        System.out.println("2. Staff Login");
+        System.out.println("3. Customer Login");
+        System.out.println("0. Exit");
+        System.out.print("Choose: ");
+
+        try {
+            String input = SCANNER.nextLine();
+
+            if (input == null || input.trim().isEmpty()) {
+                System.out.println("Input cannot be empty!");
+                continue;
+            }
+
+            if (!input.matches("\\d+")) {
+                System.out.println("Invalid input! Please enter number only.");
+                continue;
+            }
+
+            int choice = Integer.parseInt(input);
+
+            if (choice < 0 || choice > 3) {
+                System.out.println("Choice must be between 0-3");
+                continue;
+            }
+
+            return choice;
+
+        } catch (Exception e) {
+            System.out.println("Invalid input, try again.");
+        }
+    }
 }
    
 

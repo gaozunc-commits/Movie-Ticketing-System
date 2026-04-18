@@ -91,48 +91,122 @@ public class AdminMenuHandler {
         System.out.println("2. View Movies");
         System.out.println("3. Update Movie");
         System.out.println("4. Delete Movie");
+        System.out.println("0. Back");
         System.out.println("============================================================");
 
         int option = readInt("Choose movie action: ");
         switch (option) {
+            case 0:return;
             case 1:
-                System.out.println("\n[Create Movie]");
-                movieService.createMovie(
-                        new Movie(
-                                readText("Title: "),
-                                readText("Genre: "),
-                                readInt("Duration: "),
-                                readText("Age Rating: ")
-                        )
-                );
-                System.out.println("Movie created successfully.");
-                break;
+    System.out.println("\n[Create Movie]");
+    System.out.println("Enter movie details:");
 
+    String title = readText("Title: ");
+    String genre = readText("Genre: ");
+    int duration = readInt("Duration: ");
+    String age = readAgeRating();
+    if (age == null) return;
+
+    while (true) {
+        System.out.println("\n=== REVIEW MOVIE ===");
+        System.out.println("Press Number to Edit");
+        System.out.println("1. Title: " + title);
+        System.out.println("2. Genre: " + genre);
+        System.out.println("3. Duration: " + duration);
+        System.out.println("4. Age Rating: " + age);
+        System.out.println("5. Confirm & Save");
+        System.out.println("0. Cancel");
+
+        int edit = readInt("Select: ");
+
+        switch (edit) {
+            case 1:
+                title = readMovieTitle();
+                break;
+            case 2:
+                genre = readGenre();
+                break;
+            case 3:
+                duration = readDuration();
+                break;
+            case 4:
+                age = readAgeRating();
+                break;
+            case 5:
+                Movie movie = new Movie(title, genre, duration, age);
+                movieService.createMovie(movie);
+                System.out.println("Movie created successfully.");
+                return;
+            case 0:
+                System.out.println("Cancelled.");
+                return;
+            default:
+                System.out.println("Invalid option.");
+        }
+    }
             case 2:
                 System.out.println("\n[View Movies]");
                 movieService.displayMovies();
                 bookingService.displayShowtimes();
                 break;
 
+     case 3:
+    System.out.println("\n[Update Movie]");
+
+    movieService.displayMovies();
+    if (movieService.readAllMovies().length == 0) {
+        System.out.println("No movies available.");
+        return;
+    }
+
+    int indexUpdate = chooseIndex("Movie index: ", movieService.readAllMovies().length);
+    if (indexUpdate < 0) return;
+
+    Movie temp = movieService.readMovieByIndex(indexUpdate);
+
+    while (true) {
+        System.out.println("\n=== REVIEW UPDATE MOVIE ===");
+        System.out.println("1. Title: " + temp.getTitle());
+        System.out.println("2. Genre: " + temp.getGenre());
+        System.out.println("3. Duration: " + temp.getDuration());
+        System.out.println("4. Age Rating: " + temp.getAgeRating());
+        System.out.println("5. Confirm Update");
+        System.out.println("0. Cancel");
+
+        int edit = readInt("Select: ");
+
+        switch (edit) {
+            case 1:
+                temp.setTitle(readMovieTitle());
+                break;
+            case 2:
+                temp.setGenre(readGenre());
+                break;
             case 3:
-                System.out.println("\n[Update Movie]");
-                movieService.displayMovies();
-                if (movieService.readAllMovies().length == 0) {
-                    System.out.println("No movies available.");
-                    return;
-                }
-                int indexUpdate = chooseIndex("Movie index: ", movieService.readAllMovies().length);
-                if (indexUpdate < 0) return;
+                temp.setDuration(readDuration());
+                break;
+            case 4:
+                temp.setAgeRating(readAgeRating());
+                break;
+            case 5:
                 movieService.updateMovie(
                         indexUpdate,
-                        readText("New title: "),
-                        readText("New genre: "),
-                        readInt("New duration: "),
-                        readText("New age rating: ")
+                        temp.getTitle(),
+                        temp.getGenre(),
+                        temp.getDuration(),
+                        temp.getAgeRating()
                 );
                 System.out.println("Movie updated successfully.");
-                break;
+                return;
 
+            case 0:
+                System.out.println("Cancelled.");
+                return;
+
+            default:
+                System.out.println("Invalid option.");
+        }
+    }
             case 4:
                 System.out.println("\n[Delete Movie]");
                 movieService.displayMovies();
@@ -145,7 +219,7 @@ public class AdminMenuHandler {
                 movieService.deleteMovie(indexDelete);
                 System.out.println("Movie deleted successfully.");
                 break;
-
+                
             default:
                 System.out.println("Invalid option.");
         }
@@ -173,6 +247,7 @@ public class AdminMenuHandler {
                 int cols = readInt("Cols: ");
 
                 Hall hall = new Hall(hallNo, rows * cols, readText("Screen type: "), rows, cols);
+
 
                 String date = readText("Date (YYYY-MM-DD): ");
                 String time = readText("Time (HH:mm): ");
@@ -381,7 +456,7 @@ private void reportMenu() {
                 userService.deleteUser(deleteIndex);
                 System.out.println("User deleted successfully.");
                 break;
-
+                
             default:
                 System.out.println("Invalid option.");
         }
@@ -397,7 +472,18 @@ private void reportMenu() {
             }
         }
     }
+    private int readInt(String prompt, int min, int max) {
+    while (true) {
+        int value = readInt(prompt);
 
+        if (value < min || value > max) {
+            System.out.println("Must be between " + min + " and " + max);
+            continue;
+        }
+
+        return value;
+    }
+}
     private double readDouble(String prompt) {
         while (true) {
             try {
@@ -434,5 +520,66 @@ private void reportMenu() {
 
             System.out.println("Index out of range. Try again.");
         }
+
+        
     }
+    private String readAgeRating() {
+    while (true) {
+        System.out.println("\nSelect Age Rating:");
+        System.out.println("1. U (General)");
+        System.out.println("2. P13 (Parental Guidance 13)");
+        System.out.println("3. 18 (18+)");
+        System.out.println("0. Cancel");
+
+        int choice = readInt("Choose: ", 0, 3);
+
+        switch (choice) {
+            case 1: return "U";
+            case 2: return "P13";
+            case 3: return "18";
+            case 0:
+                System.out.println("Cancelled");
+                return null;
+            default:
+                System.out.println("Invalid option");
+        }
+    }
+}
+private int readDuration() {
+    return readInt("Duration (60–300 mins): ", 60, 300);
+}
+private String readMovieTitle() {
+    while (true) {
+        String title = readText("Title (no space/symbol): ");
+
+        // only letters + numbers allowed
+        if (!title.matches("[a-zA-Z0-9]+")) {
+            System.out.println("Invalid title! Only letters and numbers allowed (no space or symbol).");
+            continue;
+        }
+
+
+
+        return title;
+    }
+}
+private String readGenre() {
+    while (true) {
+        String genre = readText("Genre: ");
+
+        // not null / empty check
+        if (genre == null || genre.trim().isEmpty()) {
+            System.out.println("Genre cannot be empty!");
+            continue;
+        }
+
+        // only letters + space allowed
+        if (!genre.matches("[a-zA-Z ]+")) {
+            System.out.println("Invalid genre! Only letters and space allowed.");
+            continue;
+        }
+
+        return genre.trim();
+    }
+}
 }
