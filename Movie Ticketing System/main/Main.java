@@ -18,23 +18,48 @@ public class Main {
     private static final CustomerMenuHandler CUSTOMER_MENU = new CustomerMenuHandler(SCANNER, MOVIE_SERVICE, CONCESSION_SERVICE, BOOKING_SERVICE, PAYMENT_SERVICE);
 
     public static void main(String[] args) {
-        initializeSampleData();
         System.out.println("=== CINEMA TICKETING & CONCESSION SYSTEM ===");
-        boolean keepApplicationRunning = true;
-        do {
-            try {
-                User currentUser = login();
+       do {
+    try {
+        int choice = showMainMenu();
+
+        if (choice == 0) {
+            System.out.println("Exiting system...");
+            break;
+        }
+
+        User currentUser = login();
+
+        switch (choice) {
+            case 1:
                 if (currentUser instanceof Admin) {
                     ADMIN_MENU.run();
-                } else if (currentUser instanceof Staff) {
-                    STAFF_MENU.run();
-                } else if (currentUser instanceof Customer) {
-                    CUSTOMER_MENU.run((Customer) currentUser);
+                } else {
+                    System.out.println("Access denied: Not an Admin");
                 }
-            } catch (Exception e) {
-                System.out.println("Login failed: " + e.getMessage());
-            }
-        } while (keepApplicationRunning);
+                break;
+            case 2:
+                if (currentUser instanceof Staff) {
+                    STAFF_MENU.run();
+                } else {
+                    System.out.println("Access denied: Not Staff");
+                }
+                break;
+            case 3:
+                if (currentUser instanceof Customer) {
+                    CUSTOMER_MENU.run((Customer) currentUser);
+                } else {
+                    System.out.println("Access denied: Not Customer");
+                }
+                break;
+            default:
+                System.out.println("Invalid option.");
+        }
+
+    } catch (Exception e) {
+        System.out.println("Error: " + e.getMessage());
+    }
+} while (true);
     }
 
     private static User login() throws ArrayIndexOutOfBoundsException {
@@ -47,54 +72,15 @@ public class Main {
         System.out.println("Welcome, " + user.getName() + " (" + user.getRole() + ")");
         return user;
     }
-
+private static int showMainMenu() {
+    System.out.println("\n=== CINEMA SYSTEM ===");
+    System.out.println("1. Admin Login");
+    System.out.println("2. Staff Login");
+    System.out.println("3. Customer Login");
+    System.out.println("0. Exit");
+    System.out.print("Choose: ");
+    return Integer.parseInt(SCANNER.nextLine());
+}
    
 
-   private static void initializeSampleData() {
-    if (MOVIE_SERVICE.readAllMovies().length == 0) {
-        MOVIE_SERVICE.createMovie(new Movie("Avengers Reassembled", "Action", 132, "PG13"));
-        MOVIE_SERVICE.createMovie(new Movie("Ocean Echo", "Sci-Fi", 118, "PG"));
-    }
-
-    if (BOOKING_SERVICE.readAllShowtimes().length == 0) {
-        Movie[] movies = MOVIE_SERVICE.readAllMovies();
-
-        if (movies.length > 0) {
-            Hall hall1 = new Hall(1, 40, "IMAX", 5, 8);
-            Hall hall2 = new Hall(2, 30, "Standard", 5, 6);
-
-            BOOKING_SERVICE.createShowtime(
-                new Showtime(
-                    "ST-1001",
-                    movies[0],
-                    hall1,
-                    "2026-04-16",
-                    "14:00"
-                )
-            );
-
-            BOOKING_SERVICE.createShowtime(
-                new Showtime(
-                    "ST-1002",
-                    movies[0],
-                    hall2,
-                    "2026-04-16",
-                    "20:00"
-                )
-            );
-
-            if (movies.length > 1) {
-                BOOKING_SERVICE.createShowtime(
-                    new Showtime(
-                        "ST-1003",
-                        movies[1],
-                        hall2,
-                        "2026-04-16",
-                        "16:30"
-                    )
-                );
-            }
-        }
-    }
 }
-    }
