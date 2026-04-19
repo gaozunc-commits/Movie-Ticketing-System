@@ -540,36 +540,53 @@ private void reportMenu() {
                 break;
                
             case 3:
-            
-            System.out.println("\n[Update User Name]");
-            userService.displayUsersByCategory(4); // show ALL users
 
-            if (userService.readAllUsers().length == 0) {
-                System.out.println("No users available.");
-                return;
-            }
+    System.out.println("\n[Update User]");
+    userService.displayUsersByCategory(4);
 
-             int updateIndex = selectUserIndexFromList();
-                if (updateIndex < 0) return;
+    if (userService.readAllUsers().length == 0) {
+        System.out.println("No users available.");
+        return;
+    }
 
-                String newName;
-                while (true) {
-                    newName = readText("New name: ");
+    int index = selectUserIndexFromList();
+    if (index < 0) return;
 
-                    if (newName == null || newName.trim().isEmpty()) {
-                        System.out.println("Name cannot be empty!");
-                    }
-                    else if (!newName.matches("[a-zA-Z ]+")) {
-                        System.out.println("Name only allows letters and space!");
-                    }
-                    else {
-                        break;
-                    }
-                }
+    User u = userService.readUserByIndex(index);
 
-                userService.updateUserName(updateIndex, newName.trim());
-                System.out.println("User updated successfully.");
+    while (true) {
+        System.out.println("\n=== EDIT USER ===");
+        System.out.println("1. Name: " + u.getName());
+        System.out.println("2. Password: " + u.getPassword());
+        System.out.println("3. Role: " + getRole(u));
+        System.out.println("0. Confirm & Save");
+
+        int edit = readIntRange("Select: ", 0, 3);
+
+        switch (edit) {
+            case 1:
+                u.setName(readText("New name: "));
                 break;
+
+            case 2:
+                u.setPassword(readPassword());
+                break;
+
+            case 3:
+                changeUserRole(index, u);
+                break;
+
+            case 0:
+                // save back (important)
+                userService.updateUserName(index, u.getName());
+                userService.updateUserPassword(index, u.getPassword());
+                System.out.println("User updated successfully.");
+                return;
+
+            default:
+                System.out.println("Invalid option.");
+        }
+    }
             case 4:
 
     System.out.println("\n[Delete User]");
@@ -820,4 +837,47 @@ for (int i = 0; i < map.length; i++) {
 int selected = readIntRange("Select: ", 1, map.length);
 
 return map[selected - 1];
-}}
+}
+private String getRole(User u) {
+    if (u instanceof Admin) return "ADMIN";
+    if (u instanceof Staff) return "STAFF";
+    if (u instanceof Customer) return "CUSTOMER";
+    return "UNKNOWN";
+}
+private void changeUserRole(int index, User oldUser) {
+
+    System.out.println("Select new role:");
+    System.out.println("1. Admin");
+    System.out.println("2. Staff");
+    System.out.println("3. Customer");
+
+    int choice = readIntRange("Select: ", 1, 3);
+
+    User newUser;
+
+    String username = oldUser.getUsername();
+    String password = oldUser.getPassword();
+    String name = oldUser.getName();
+
+    switch (choice) {
+        case 1:
+            newUser = new Admin(username, password, name);
+            break;
+
+        case 2:
+            int staffId = readInt("Staff ID: ");
+            newUser = new Staff(username, password, name, staffId);
+            break;
+
+        case 3:
+            newUser = new Customer(username, password, name);
+            break;
+
+        default:
+            return;
+    }
+
+    userService.replaceUser(index, newUser);
+}
+
+}

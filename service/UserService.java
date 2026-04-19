@@ -379,4 +379,13 @@ public int[] getFilteredIndexes(int type) {
 
     return result;
 }
+public void replaceUser(int index, User newUser) {
+    users[index] = newUser;
+    save();
+}
+public void updateUserPassword(int index, String newPassword) {
+    User u = readUserByIndex(index);
+    u.setPassword(newPassword);
+    save();
+}
 }
