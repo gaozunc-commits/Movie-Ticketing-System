@@ -27,8 +27,8 @@ public class BookingService {
     private Booking[] bookings;
     private int bookingCount;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    public BookingService(MovieService movieService) {
+    
+        public BookingService(MovieService movieService) {
         showtimes = new Showtime[0];
         showtimeCount = 0;
         orders = new Order[0];
@@ -38,45 +38,11 @@ public class BookingService {
         loadShowtimes(movieService);
         loadOrders();
         loadBookings();
+        
     }
 
-    public void createShowtime(Showtime showtime) {
-        showtimes = appendShowtime(showtimes, showtime);
-        showtimeCount++;
-        saveShowtimes();
-    }
 
-    public Showtime[] readAllShowtimes() {
-        sortShowtimes();
-        Showtime[] copied = new Showtime[showtimeCount];
-        for (int i = 0; i < showtimeCount; i++) {
-            copied[i] = showtimes[i];
-        }
-        return copied;
-    }
-
-    public Showtime readShowtimeByIndex(int index) {
-        if (index < 0 || index >= showtimeCount) {
-            throw new IllegalArgumentException("Showtime index out of range.");
-        }
-        return showtimes[index];
-    }
-
-    public void updateShowtimeTime(int index, String newTime) {
-        Showtime showtime = readShowtimeByIndex(index);
-        showtime.setTime(newTime);
-        saveShowtimes();
-    }
-
-    public void deleteShowtime(int index) {
-        if (index < 0 || index >= showtimeCount) {
-            throw new IllegalArgumentException("Showtime index out of range.");
-        }
-        showtimes = removeShowtimeAt(showtimes, index);
-        showtimeCount--;
-        saveShowtimes();
-    }
-
+ 
     public Order createOrder(String customerUsername, Showtime showtime) {
         if (showtime == null) {
             throw new IllegalArgumentException("Showtime cannot be null when creating order.");
@@ -89,17 +55,30 @@ public class BookingService {
         orderCount++;
         return order;
     }
+    private int getRowIndex(String seat) {
+    return seat.charAt(0) - 'A';
+}
 
+private int getColIndex(String seat) {
+    return Integer.parseInt(seat.substring(1)) - 1;
+}
     public Ticket createTicketForSeat(Showtime showtime, String seatNumber) {
-        if (showtime == null) {
-            throw new IllegalArgumentException("Showtime cannot be null.");
-        }
-        String seatType = showtime.getSeatType(seatNumber);
-        if ("VIP".equalsIgnoreCase(seatType)) {
-            return new VIPTicket(seatNumber);
-        }
-        return new StandardTicket(seatNumber);
+
+    if (showtime == null) {
+        throw new IllegalArgumentException("Showtime cannot be null.");
     }
+
+    int row = getRowIndex(seatNumber);
+    int col = getColIndex(seatNumber);
+
+    String seatType = showtime.getHall().getSeatType(row, col);
+
+    if ("VIP".equalsIgnoreCase(seatType)) {
+        return new VIPTicket(seatNumber);
+    }
+
+    return new StandardTicket(seatNumber);
+}
 
     public void persistOrder(Order order) {
         if (order == null) {
@@ -169,98 +148,7 @@ public class BookingService {
         return false;
     }
 
-    private void saveShowtimes() {
-    String[] lines = new String[showtimeCount];
-
-    for (int i = 0; i < showtimeCount; i++) {
-        Showtime s = showtimes[i];
-
-        StringBuilder seatData = new StringBuilder();
-        boolean[][] seats = s.copySeatOccupancy();
-
-        for (int r = 0; r < seats.length; r++) {
-            for (int c = 0; c < seats[r].length; c++) {
-                seatData.append(seats[r][c] ? "1" : "0").append(",");
-            }
-        }
-
-        lines[i] =
-            s.getShowtimeId() + "|" +
-            s.getMovie().getTitle() + "|" +
-            s.getHall().getHallNumber() + "|" +
-            s.getDate() + "|" +
-            s.getTime() + "|" +
-            s.getHall().getCapacity() + "|" +
-            s.getHall().getScreenType() + "|" +
-            s.getSeatRowCount() + "|" +
-            s.getSeatColumnCount() + "|" +
-            seatData;
-    }
-
-    FileHandler.overwriteFile(SHOWTIME_FILE, lines);
-}
-
-   private void loadShowtimes(MovieService movieService) {
-
-    showtimes = new Showtime[0];
-    showtimeCount = 0;
-
-    String[] lines = FileHandler.readFromFile(SHOWTIME_FILE);
-    Movie[] movies = movieService.readAllMovies();
-
-    for (String line : lines) {
-        try {
-            String[] p = line.split("\\|");
-
-            Movie movie = null;
-            for (Movie m : movies) {
-                if (m.getTitle().equalsIgnoreCase(p[1])) {
-                    movie = m;
-                    break;
-                }
-            }
-
-            if (movie == null) continue;
-
-            Hall hall = new Hall(
-                Integer.parseInt(p[2]),
-                Integer.parseInt(p[5]),
-                p[6],
-                Integer.parseInt(p[7]),
-                Integer.parseInt(p[8])
-            );
-
-            Showtime s = new Showtime(
-                p[0],
-                movie,
-                hall,
-                p[3], // date
-                p[4]  // time
-            );
-
-            String[] seatTokens = p[9].split(",");
-            int rows = s.getSeatRowCount();
-            int cols = s.getSeatColumnCount();
-            boolean[][] restored = new boolean[rows][cols];
-            int k = 0;
-            for (int r = 0; r < rows; r++) {
-                for (int c = 0; c < cols; c++) {
-                    if (k < seatTokens.length) {
-                        restored[r][c] = "1".equals(seatTokens[k]);
-                        k++;
-                    }
-                }
-            }
-            s.importSeatOccupancy(restored);
-
-            showtimes = appendShowtime(showtimes, s);
-            showtimeCount++;
-
-        } catch (Exception e) {
-            System.out.println("Skip invalid showtime: " + line);
-        }
-    }
-}
+   
 
    private void loadOrders() {
     orders = new Order[0];
@@ -376,8 +264,8 @@ public class BookingService {
         for (int i = 0; i < showtimeCount - 1; i++) {
             for (int j = i + 1; j < showtimeCount; j++) {
 
-                String dateTime1 = showtimes[i].getDate() + " " + showtimes[i].getTime();
-                String dateTime2 = showtimes[j].getDate() + " " + showtimes[j].getTime();
+                String dateTime1 = showtimes[i].getDate() + " " + showtimes[i].getStartTime();
+                String dateTime2 = showtimes[j].getDate() + " " + showtimes[j].getStartTime();
 
                 if (dateTime1.compareTo(dateTime2) > 0) {
                     Showtime temp = showtimes[i];
@@ -397,26 +285,6 @@ public class BookingService {
         return false;
     }
 
-    private Showtime[] appendShowtime(Showtime[] source, Showtime showtime) {
-        Showtime[] expanded = new Showtime[source.length + 1];
-        for (int i = 0; i < source.length; i++) {
-            expanded[i] = source[i];
-        }
-        expanded[source.length] = showtime;
-        return expanded;
-    }
-
-    private Showtime[] removeShowtimeAt(Showtime[] source, int index) {
-        Showtime[] reduced = new Showtime[source.length - 1];
-        int target = 0;
-        for (int i = 0; i < source.length; i++) {
-            if (i == index) {
-                continue;
-            }
-            reduced[target++] = source[i];
-        }
-        return reduced;
-    }
 
     private Order[] appendOrder(Order[] source, Order order) {
         Order[] expanded = new Order[source.length + 1];
@@ -491,7 +359,140 @@ public class BookingService {
         }
         return false;
     }
+   
+    
 
+    // ================= CREATE =================
+    public void createShowtime(Showtime s) {
+        showtimes = append(showtimes, s);
+        showtimeCount++;
+        saveShowtimes();
+    }
+
+    // ================= READ =================
+    public Showtime[] readAllShowtimes() {
+        return copyArray(showtimes, showtimeCount);
+    }
+
+    public Showtime readShowtimeByIndex(int index) {
+        if (index < 0 || index >= showtimeCount) {
+            throw new IndexOutOfBoundsException("Invalid index");
+        }
+        return showtimes[index];
+    }
+
+    // ================= UPDATE =================
+    public void updateShowtimeTime(int index, String newStart, String newEnd) {
+        if (index < 0 || index >= showtimeCount) {
+            throw new IndexOutOfBoundsException("Invalid index");
+        }
+
+        showtimes[index].setStartTime(newStart);
+        showtimes[index].setEndTime(newEnd);
+
+        saveShowtimes();
+    }
+
+    // ================= DELETE =================
+    public void deleteShowtime(int index) {
+        if (index < 0 || index >= showtimeCount) {
+            throw new IndexOutOfBoundsException("Invalid index");
+        }
+
+        showtimes = remove(showtimes, index);
+        showtimeCount--;
+        saveShowtimes();
+    }
+
+    // ================= SAVE =================
+    private void saveShowtimes() {
+
+        String[] lines = new String[showtimeCount];
+
+        for (int i = 0; i < showtimeCount; i++) {
+            Showtime s = showtimes[i];
+
+            lines[i] =
+                    s.getShowtimeId() + "|" +
+                    s.getMovie().getTitle() + "|" +
+                    s.getHall().getHallNumber() + "|" +
+                    s.getDate() + "|" +
+                    s.getStartTime() + "|" +
+                    s.getEndTime();
+        }
+
+        FileHandler.overwriteFile(SHOWTIME_FILE, lines);
+    }
+
+    // ================= LOAD =================
+    private void loadShowtimes(MovieService movieService) {
+
+        showtimes = new Showtime[0];
+        showtimeCount = 0;
+
+        String[] lines = FileHandler.readFromFile(SHOWTIME_FILE);
+        Movie[] movies = movieService.readAllMovies();
+
+        for (String line : lines) {
+            try {
+                String[] p = line.split("\\|");
+
+                Movie movie = null;
+                for (Movie m : movies) {
+                    if (m.getTitle().equalsIgnoreCase(p[1])) {
+                        movie = m;
+                        break;
+                    }
+                }
+
+                if (movie == null) continue;
+
+                int hallNo = Integer.parseInt(p[2]);
+                Hall hall = new Hall(hallNo);
+
+                Showtime s = new Showtime(
+                        p[0],
+                        movie,
+                        hall,
+                        p[3],
+                        p[4],
+                        p[5]
+                );
+
+                showtimes = append(showtimes, s);
+                showtimeCount++;
+
+            } catch (Exception e) {
+                System.out.println("Skip invalid showtime: " + line);
+            }
+        }
+    }
+
+
+    // ================= HALL AVAILABILITY =================
+    public boolean isHallAvailable(int hallNo, String date, String start, String end) {
+
+    for (int i = 0; i < showtimeCount; i++) {
+
+        Showtime s = showtimes[i];
+
+        if (s.getHall().getHallNumber() == hallNo &&
+            s.getDate().equals(date)) {
+
+            if (isOverlap(start, end, s.getStartTime(), s.getEndTime())) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+   private boolean isOverlap(String newStart, String newEnd, String existStart, String existEnd) {
+
+    return newStart.compareTo(existEnd) < 0 &&
+           newEnd.compareTo(existStart) > 0;
+}
     private void registerBookingIfAbsent(Order order) {
         if (hasBookingForOrder(order.getOrderId())) {
             return;
@@ -501,30 +502,113 @@ public class BookingService {
         bookingCount++;
         saveBookings();
     }
+       private Showtime[] append(Showtime[] arr, Showtime s) {
+        Showtime[] newArr = new Showtime[arr.length + 1];
+        for (int i = 0; i < arr.length; i++) newArr[i] = arr[i];
+        newArr[arr.length] = s;
+        return newArr;
+    }
 
-    public void displayShowtimes() {
-        Showtime[] allShowtimes = readAllShowtimes();
-        ConsoleUi.banner("SHOWTIMES");
-        System.out.printf("%-5s %-25s %-10s %-12s %-10s %-20s%n",
-"No.", "Movie", "Hall", "Date", "Time", "Showtime ID");
-        System.out.println("---");
-        if (allShowtimes.length == 0) {
-            System.out.println("No showtimes available.");
-            return;
+    private Showtime[] remove(Showtime[] arr, int index) {
+        Showtime[] newArr = new Showtime[arr.length - 1];
+        int j = 0;
+
+        for (int i = 0; i < arr.length; i++) {
+            if (i != index) newArr[j++] = arr[i];
         }
-        for (int i = 0; i < allShowtimes.length; i++) {
-            Showtime s = allShowtimes[i];
-           String hallLabel = "Hall " + s.getHall().getHallNumber();
 
-        System.out.printf("%-5d %-25s %-10s %-12s %-10s %-20s%n",
-        i + 1,
-        s.getMovie().getTitle(),
-        hallLabel,
-        s.getDate(),
-        s.getTime(),
-        s.getShowtimeId());
-                }
+        return newArr;
+    }
+
+    private Showtime[] copyArray(Showtime[] arr, int size) {
+        Showtime[] copy = new Showtime[size];
+        for (int i = 0; i < size; i++) copy[i] = arr[i];
+        return copy;
+    }
+    private String[] generateTimeSlots() {
+
+    java.util.ArrayList<String> list = new java.util.ArrayList<>();
+
+    for (int h = 10; h < 20; h++) {
+        list.add(String.format("%02d:00", h));
+        list.add(String.format("%02d:30", h));
+    }
+
+    // add 20:00 only
+    list.add("20:00");
+
+    return list.toArray(new String[0]);
+}
+private boolean isOccupied(int hallNo, String date, String timeSlot) {
+
+    for (int i = 0; i < showtimeCount; i++) {
+
+        Showtime s = showtimes[i];
+
+        if (s.getHall().getHallNumber() == hallNo &&
+            s.getDate().equals(date)) {
+
+            String start = s.getStartTime();
+            String end = s.getEndTime();
+
+            if (timeSlot.compareTo(start) >= 0 &&
+                timeSlot.compareTo(end) < 0) {
+                return true;
             }
+        }
+    }
+    return false;
+}
+public void displayTimetableMatrix(String date) {
+
+    String[] slots = generateTimeSlots();
+
+    int halls = 8;
+
+    System.out.println("\n===== TIMETABLE MATRIX (" + date + ") =====");
+
+    // header
+    System.out.print(String.format("%-8s", "Hall\\Time"));
+
+    for (String t : slots) {
+        System.out.print(String.format("%-6s", t));
+    }
+    System.out.println();
+
+    // rows
+    for (int h = 1; h <= halls; h++) {
+
+        System.out.print(String.format("%-8s", "Hall " + h));
+
+        for (String slot : slots) {
+
+            boolean occupied = isOccupied(h, date, slot);
+
+            System.out.print(String.format("%-6s", occupied ? "X" : "O"));
+        }
+
+        System.out.println();
+    }
+}
+    public void displayShowtimes() {
+        sortShowtimes();
+        System.out.println("\n----------------------------------------------------");
+        System.out.printf("%-5s %-20s %-6s %-12s %-10s %-10s\n",
+                "No", "Movie", "Hall", "Date", "Start", "End");
+        System.out.println("----------------------------------------------------");
+
+        for (int i = 0; i < showtimeCount; i++) {
+            Showtime s = showtimes[i];
+
+            System.out.printf("%-5d %-20s %-6d %-12s %-10s %-10s\n",
+                    i + 1,
+                    s.getMovie().getTitle(),
+                    s.getHall().getHallNumber(),
+                    s.getDate(),
+                    s.getStartTime(),
+                    s.getEndTime());
+        }
+    }
 
     public void displayOrderReceipts() {
         Order[] allOrders = readAllOrders();
@@ -539,7 +623,7 @@ public class BookingService {
         }
         ConsoleUi.lightRule();
     }
-
+    
     private void printOrderReceipt(Order order) {
         ConsoleUi.banner("MOVIE ORDER RECEIPT");
         System.out.printf("%-16s %s%n", "Order ID", order.getOrderId());

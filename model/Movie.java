@@ -13,7 +13,7 @@ public class Movie {
         setDuration(duration);
         setAgeRating(ageRating);
     }
-
+    
     public String getTitle() {
         return title;
     }

@@ -104,6 +104,10 @@ public final class AdminCrud {
         }
 
         Movie temp = movieService.readMovieByIndex(indexUpdate);
+            if (movieService.readAllMovies().length == 0) {
+        System.out.println("No movies available.");
+        return;
+    }
 
         while (true) {
             System.out.println("\n=== REVIEW UPDATE MOVIE ===");
@@ -168,44 +172,59 @@ public final class AdminCrud {
     // Showtime CRUD
 
     public void createShowtimeFromConsole() {
-        System.out.println("\n=== CREATE SHOWTIME ===");
-        movieService.displayMovies();
-        if (movieService.readAllMovies().length == 0) {
-            System.out.println("No movies available.");
-            return;
-        }
-        int movieIndex = chooseIndex("Movie index: ", movieService.readAllMovies().length);
-        if (movieIndex < 0) {
-            return;
-        }
 
-        Movie movie = movieService.readMovieByIndex(movieIndex);
+    System.out.println("\n=== CREATE SHOWTIME ===");
 
-        int hallNo = readInt("Hall number: ");
-        int rows = readInt("Rows: ");
-        int cols = readInt("Cols: ");
+    movieService.displayMovies();
 
-        Hall hall = new Hall(hallNo, rows * cols, InputValidator.promptText(scanner, "Screen type: "), rows, cols);
-
-        String date = InputValidator.promptIsoDate(scanner, "Date (YYYY-MM-DD): ");
-        String time = InputValidator.promptTimeHHmm(scanner, "Time (HH:mm): ");
-
-        Showtime showtime = new Showtime(
-                "ST-" + System.currentTimeMillis(),
-                movie,
-                hall,
-                date,
-                time
-        );
-
-        bookingService.createShowtime(showtime);
-        System.out.println("Showtime created successfully.");
+    if (movieService.readAllMovies().length == 0) {
+        System.out.println("No movies available.");
+        return;
     }
+
+    int movieIndex = chooseIndex("Movie index: ", movieService.readAllMovies().length);
+    if (movieIndex < 0) return;
+
+    Movie movie = movieService.readMovieByIndex(movieIndex);
+
+    String date = InputValidator.promptIsoDate(scanner, "Date (YYYY-MM-DD): ");
+
+    bookingService.displayTimetableMatrix(date);
+
+    int hallNo = readInt("Hall number: ");
+
+    String startTime = InputValidator.promptTimeSlotHHmm(scanner, "Time (HH:mm): ");
+    String endTime = InputValidator.calculateEndTime(startTime, movie.getDuration());
+
+if (endTime.compareTo("20:00") > 0) {
+    System.out.println("Movie exceeds cinema operating hours (10:00–20:00)");
+    return;
+}
+
+    if (!bookingService.isHallAvailable(hallNo, date, startTime, endTime)) {
+        System.out.println(" Time slot already occupied!");
+        return;
+    }
+
+    Hall hall = new Hall(hallNo);
+
+    Showtime showtime = new Showtime(
+        "ST-" + System.currentTimeMillis(),
+        movie,
+        hall,
+        date,
+        startTime,
+        endTime
+    );
+
+    bookingService.createShowtime(showtime);
+        System.out.println("Showtime created successfully.");
+}
 
     public void displayShowtimesList() {
         bookingService.displayShowtimes();
     }
-
+    
     public void updateShowtimeTimeFromConsole() {
         System.out.println("\n=== UPDATE SHOWTIME ===");
         bookingService.displayShowtimes();
@@ -217,8 +236,13 @@ public final class AdminCrud {
         if (updateIndex < 0) {
             return;
         }
-        String newTime = InputValidator.promptTimeHHmm(scanner, "New time (HH:mm): ");
-        bookingService.updateShowtimeTime(updateIndex, newTime);
+        String startTime = InputValidator.promptTimeHHmm(scanner, "Start Time (HH:mm): ");
+
+        String newEnd = InputValidator.calculateEndTime(
+        startTime,
+        bookingService.readShowtimeByIndex(updateIndex).getMovie().getDuration()
+);
+    bookingService.updateShowtimeTime(updateIndex, startTime, newEnd);
         System.out.println("Showtime updated successfully.");
     }
 
@@ -477,9 +501,7 @@ public final class AdminCrud {
                     break;
 
                 case 0:
-                    // Persist edits through service (single source of truth for files).
-                    userService.updateUserName(index, user.getName());
-                    userService.updateUserPassword(index, user.getPassword());
+                    userService.replaceUser(index, user);
                     System.out.println("User updated successfully.");
                     return;
 
@@ -538,7 +560,7 @@ public final class AdminCrud {
     }
 
     private int readDuration() {
-        return InputValidator.promptIntInRange(scanner, "Duration (60–300 mins): ", 1, 300);
+        return InputValidator.promptIntInRange(scanner, "Duration (1–300 mins): ", 1, 300);
     }
 
     private String readMovieTitle() {
