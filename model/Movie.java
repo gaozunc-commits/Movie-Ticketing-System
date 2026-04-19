@@ -6,7 +6,6 @@ public class Movie {
     private int duration;
     private String ageRating;
 
-    // Parameterized constructor to initialize a movie with validated values.
     public Movie(String title, String genre, int duration, String ageRating) {
         setTitle(title);
         setGenre(genre);
@@ -14,12 +13,10 @@ public class Movie {
         setAgeRating(ageRating);
     }
 
-    // Getter for movie title.
     public String getTitle() {
         return title;
     }
 
-    // Setter for movie title with basic validation.
     public void setTitle(String title) {
         if (title == null || title.trim().isEmpty()) {
             throw new ArrayIndexOutOfBoundsException("Movie title cannot be empty.");
@@ -27,7 +24,6 @@ public class Movie {
         this.title = title.trim();
     }
 
-    // Getter for movie genre.
     public String getGenre() {
         return genre;
     }
@@ -40,12 +36,11 @@ public class Movie {
         this.genre = genre.trim();
     }
 
-    // Getter for movie duration in minutes.
     public int getDuration() {
         return duration;
     }
 
-    // Setter for movie duration with basic validation.
+
     public void setDuration(int duration) {
         if (duration <= 0) {
             throw new ArrayIndexOutOfBoundsException("Duration must be positive.");
@@ -53,12 +48,10 @@ public class Movie {
         this.duration = duration;
     }
 
-    // Getter for movie age rating.
     public String getAgeRating() {
         return ageRating;
     }
 
-    // Setter for movie age rating with basic validation.
     public void setAgeRating(String ageRating) {
         if (ageRating == null || ageRating.trim().isEmpty()) {
             throw new ArrayIndexOutOfBoundsException("Age rating cannot be empty.");

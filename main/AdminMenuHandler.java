@@ -1,5 +1,8 @@
 package main;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Scanner;
 import model.Admin;
 import model.ConcessionItem;
 import model.Customer;
@@ -14,9 +17,6 @@ import service.MovieService;
 import service.ReportService;
 import service.UserService;
 import util.InputValidator;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Scanner;
 
 public class AdminMenuHandler {
     private final Scanner scanner;
@@ -100,115 +100,115 @@ public class AdminMenuHandler {
         switch (option) {
             case 0:return;
             case 1:
-    System.out.println("\n[Create Movie]");
-    System.out.println("Enter movie details:");
+                System.out.println("\n[Create Movie]");
+                System.out.println("Enter movie details:");
 
-    String title = readMovieTitle();
-    String genre = readGenre();
-    int duration = readDuration();
-    String age = readAgeRating();
-    if (age == null) return;
+                String title = readMovieTitle();
+                String genre = readGenre();
+                int duration = readDuration();
+                String age = readAgeRating();
+                if (age == null) return;
 
-    while (true) {
-        System.out.println("\n=== REVIEW MOVIE ===");
-        System.out.println("Press Number to Edit");
-        System.out.println("1. Title: " + title);
-        System.out.println("2. Genre: " + genre);
-        System.out.println("3. Duration: " + duration);
-        System.out.println("4. Age Rating: " + age);
-        System.out.println("5. Confirm & Save");
-        System.out.println("0. Cancel");
+                while (true) {
+                    System.out.println("\n=== REVIEW MOVIE ===");
+                    System.out.println("Press Number to Edit");
+                    System.out.println("1. Title: " + title);
+                    System.out.println("2. Genre: " + genre);
+                    System.out.println("3. Duration: " + duration);
+                    System.out.println("4. Age Rating: " + age);
+                    System.out.println("5. Confirm & Save");
+                    System.out.println("0. Cancel");
 
-        int edit = readIntRange("Select: ", 0, 5);
+                    int edit = readIntRange("Select: ", 0, 5);
 
-        switch (edit) {
-            case 1:
-                title = readMovieTitle();
-                break;
-            case 2:
-                genre = readGenre();
-                break;
-            case 3:
-                duration = readDuration();
-                break;
-            case 4:
-                age = readAgeRating();
-                break;
-            case 5:
-                Movie movie = new Movie(title, genre, duration, age);
-                movieService.createMovie(movie);
-                System.out.println("Movie created successfully.");
-                return;
-            case 0:
-                System.out.println("Cancelled.");
-                return;
-            default:
-                System.out.println("Invalid option.");
-        }
-    }
+                    switch (edit) {
+                        case 1:
+                            title = readMovieTitle();
+                            break;
+                        case 2:
+                            genre = readGenre();
+                            break;
+                        case 3:
+                            duration = readDuration();
+                            break;
+                        case 4:
+                            age = readAgeRating();
+                            break;
+                        case 5:
+                            Movie movie = new Movie(title, genre, duration, age);
+                            movieService.createMovie(movie);
+                            System.out.println("Movie created successfully.");
+                            return;
+                        case 0:
+                            System.out.println("Cancelled.");
+                            return;
+                        default:
+                            System.out.println("Invalid option.");
+                    }
+                }
             case 2:
                 System.out.println("\n[View Movies]");
                 movieService.displayMovies();
                 bookingService.displayShowtimes();
                 break;
 
-     case 3:
-    System.out.println("\n[Update Movie]");
+        case 3:
+                System.out.println("\n[Update Movie]");
 
-    movieService.displayMovies();
-    if (movieService.readAllMovies().length == 0) {
-        System.out.println("No movies available.");
-        return;
-    }
+                movieService.displayMovies();
+                if (movieService.readAllMovies().length == 0) {
+                    System.out.println("No movies available.");
+                    return;
+                }
 
-    int indexUpdate = chooseIndex("Movie index: ", movieService.readAllMovies().length);
-    if (indexUpdate < 0) return;
+                int indexUpdate = chooseIndex("Movie index: ", movieService.readAllMovies().length);
+                if (indexUpdate < 0) return;
 
-    Movie temp = movieService.readMovieByIndex(indexUpdate);
+                Movie temp = movieService.readMovieByIndex(indexUpdate);
 
-    while (true) {
-        System.out.println("\n=== REVIEW UPDATE MOVIE ===");
-        System.out.println("1. Title: " + temp.getTitle());
-        System.out.println("2. Genre: " + temp.getGenre());
-        System.out.println("3. Duration: " + temp.getDuration());
-        System.out.println("4. Age Rating: " + temp.getAgeRating());
-        System.out.println("5. Confirm Update");
-        System.out.println("0. Cancel");
+                while (true) {
+                    System.out.println("\n=== REVIEW UPDATE MOVIE ===");
+                    System.out.println("1. Title: " + temp.getTitle());
+                    System.out.println("2. Genre: " + temp.getGenre());
+                    System.out.println("3. Duration: " + temp.getDuration());
+                    System.out.println("4. Age Rating: " + temp.getAgeRating());
+                    System.out.println("5. Confirm Update");
+                    System.out.println("0. Cancel");
 
-        int edit = readIntRange("Select: ", 0, 5);
+                    int edit = readIntRange("Select: ", 0, 5);
 
-        switch (edit) {
-            case 1:
-                temp.setTitle(readMovieTitle());
-                break;
-            case 2:
-                temp.setGenre(readGenre());
-                break;
-            case 3:
-                temp.setDuration(readDuration());
-                break;
-            case 4:
-                temp.setAgeRating(readAgeRating());
-                break;
-            case 5:
-                movieService.updateMovie(
-                        indexUpdate,
-                        temp.getTitle(),
-                        temp.getGenre(),
-                        temp.getDuration(),
-                        temp.getAgeRating()
-                );
-                System.out.println("Movie updated successfully.");
-                return;
+                    switch (edit) {
+                        case 1:
+                            temp.setTitle(readMovieTitle());
+                            break;
+                        case 2:
+                            temp.setGenre(readGenre());
+                            break;
+                        case 3:
+                            temp.setDuration(readDuration());
+                            break;
+                        case 4:
+                            temp.setAgeRating(readAgeRating());
+                            break;
+                        case 5:
+                            movieService.updateMovie(
+                                    indexUpdate,
+                                    temp.getTitle(),
+                                    temp.getGenre(),
+                                    temp.getDuration(),
+                                    temp.getAgeRating()
+                            );
+                            System.out.println("Movie updated successfully.");
+                            return;
 
-            case 0:
-                System.out.println("Cancelled.");
-                return;
+                        case 0:
+                            System.out.println("Cancelled.");
+                            return;
 
-            default:
-                System.out.println("Invalid option.");
-        }
-    }
+                        default:
+                            System.out.println("Invalid option.");
+                    }
+                }
             case 4:
                 System.out.println("\n[Delete Movie]");
                 movieService.displayMovies();
@@ -242,7 +242,7 @@ public class AdminMenuHandler {
                 int movieIndex = chooseIndex("Movie index: ", movieService.readAllMovies().length);
                 if (movieIndex < 0) return;
 
-            Movie movie = movieService.readMovieByIndex(movieIndex);
+                Movie movie = movieService.readMovieByIndex(movieIndex);
               
 
                 int hallNo = readInt("Hall number: ");
@@ -300,158 +300,158 @@ public class AdminMenuHandler {
                 System.out.println("Invalid option.");
         }
     }
-private void reportMenu() {
-    while (true) {
-        System.out.println("\n--- REPORT MENU ---");
-        System.out.println("1. Best Selling Movies");
-        System.out.println("2. Peak Hours");
-        System.out.println("3. Concession Report");
-        System.out.println("0. Back");
+    private void reportMenu() {
+        while (true) {
+            System.out.println("\n--- REPORT MENU ---");
+            System.out.println("1. Best Selling Movies");
+            System.out.println("2. Peak Hours");
+            System.out.println("3. Concession Report");
+            System.out.println("0. Back");
 
-        int choice = readInt("Choose: ");
+            int choice = readInt("Choose: ");
 
-        switch (choice) {
-            case 1:
-                reportService.bestSellingMovies();
-                break;
-            case 2:
-                reportService.peakHours();
-                break;
-            case 3:
-                reportService.concessionReport();
-                break;
-            case 0:
-                return;
-            default:
-                System.out.println("Invalid option.");
+            switch (choice) {
+                case 1:
+                    reportService.bestSellingMovies();
+                    break;
+                case 2:
+                    reportService.peakHours();
+                    break;
+                case 3:
+                    reportService.concessionReport();
+                    break;
+                case 0:
+                    return;
+                default:
+                    System.out.println("Invalid option.");
+            }
         }
     }
-}
     private void concessionCrudMenu() {
         System.out.println("\n--- CONCESSION CRUD ---");
-        System.out.println("1. Create 2. Read 3. Update 4. Delete");
+        System.out.println("1. Create 2. Read 3. Update 4. Delete 0. Back");
 
         int option = readIntRange("Select: ", 0, 4);
         switch (option) {
             case 0:return;
-           case 1:
-    System.out.println("\n[Create Concession Item]");
-
-    String name = readText("Name: ");
-    double price = readDoubleRange("Price: ", 0, Double.MAX_VALUE);
-    int stock = readIntRange("Stock: ", 0, Integer.MAX_VALUE);
-    String category = readCategory();
-    if (category == null) return;
-
-    while (true) {
-        System.out.println("\n=== REVIEW CONCESSION ITEM ===");
-        System.out.println("Press Number to Edit");
-        System.out.println("1. Name: " + name);
-        System.out.println("2. Price: " + price);
-        System.out.println("3. Stock: " + stock);
-        System.out.println("4. Category: " + category);
-        System.out.println("5. Confirm & Save");
-        System.out.println("0. Cancel");
-
-        int edit = readIntRange("Select: ", 0, 5);
-
-        switch (edit) {
             case 1:
-                name = readText("New Name: ");
-                break;
+                System.out.println("\n[Create Concession Item]");
 
-            case 2:
-                price = readDoubleRange("New Price: ", 0, Double.MAX_VALUE);
-                break;
+                String name = readText("Name: ");
+                double price = readDoubleRange("Price: ", 0, Double.MAX_VALUE);
+                int stock = readIntRange("Stock: ", 0, Integer.MAX_VALUE);
+                String category = readCategory();
+                if (category == null) return;
 
-            case 3:
-                stock = readIntRange("New Stock: ", 0, Integer.MAX_VALUE);
-                break;
+                while (true) {
+                    System.out.println("\n=== REVIEW CONCESSION ITEM ===");
+                    System.out.println("Press Number to Edit");
+                    System.out.println("1. Name: " + name);
+                    System.out.println("2. Price: " + price);
+                    System.out.println("3. Stock: " + stock);
+                    System.out.println("4. Category: " + category);
+                    System.out.println("5. Confirm & Save");
+                    System.out.println("0. Cancel");
 
-            case 4:
-                category = readCategory();
-                break;
+                    int edit = readIntRange("Select: ", 0, 5);
 
-            case 5:
-                concessionService.createItem(
-                        new ConcessionItem(name, price, stock, category)
-                );
-                System.out.println("Concession item created successfully.");
-                return;
+                    switch (edit) {
+                        case 1:
+                            name = readText("New Name: ");
+                            break;
 
-            case 0:
-                System.out.println("Cancelled.");
-                return;
+                        case 2:
+                            price = readDoubleRange("New Price: ", 0, Double.MAX_VALUE);
+                            break;
 
-            default:
-                System.out.println("Invalid option.");
-        }
-    }
+                        case 3:
+                            stock = readIntRange("New Stock: ", 0, Integer.MAX_VALUE);
+                            break;
+
+                        case 4:
+                            category = readCategory();
+                            break;
+
+                        case 5:
+                            concessionService.createItem(
+                                    new ConcessionItem(name, price, stock, category)
+                            );
+                            System.out.println("Concession item created successfully.");
+                            return;
+
+                        case 0:
+                            System.out.println("Cancelled.");
+                            return;
+
+                        default:
+                            System.out.println("Invalid option.");
+                    }
+                }
             case 2:
                 concessionService.displayConcessions();
                 break;
 
             case 3:
-    System.out.println("\n[Update Concession Item]");
+                System.out.println("\n[Update Concession Item]");
 
-    concessionService.displayConcessions();
-    if (concessionService.readAllItems().length == 0) {
-        System.out.println("No concession items available.");
-        return;
-    }
+                concessionService.displayConcessions();
+                if (concessionService.readAllItems().length == 0) {
+                    System.out.println("No concession items available.");
+                    return;
+                }
 
-    int updateIndex = chooseIndex("Concession index: ", concessionService.readAllItems().length);
-    if (updateIndex < 0) return;
+                int updateIndex = chooseIndex("Concession index: ", concessionService.readAllItems().length);
+                if (updateIndex < 0) return;
 
-    ConcessionItem temp = concessionService.readAllItems()[updateIndex];
+                ConcessionItem temp = concessionService.readAllItems()[updateIndex];
 
-    String nameU = temp.getName();
-    double priceU = temp.getPrice();
-    int stockU = temp.getStock();
-    String categoryU = temp.getCategory();
+                String nameU = temp.getName();
+                double priceU = temp.getPrice();
+                int stockU = temp.getStock();
+                String categoryU = temp.getCategory();
 
-    while (true) {
-        System.out.println("\n=== REVIEW UPDATE CONCESSION ===");
-        System.out.println("Press Number to Edit");
-        System.out.println("1. Name: " + nameU);
-        System.out.println("2. Price: " + priceU);
-        System.out.println("3. Stock: " + stockU);
-        System.out.println("4. Category: " + categoryU);
-        System.out.println("5. Confirm Update");
-        System.out.println("0. Cancel");
+                while (true) {
+                    System.out.println("\n=== REVIEW UPDATE CONCESSION ===");
+                    System.out.println("Press Number to Edit");
+                    System.out.println("1. Name: " + nameU);
+                    System.out.println("2. Price: " + priceU);
+                    System.out.println("3. Stock: " + stockU);
+                    System.out.println("4. Category: " + categoryU);
+                    System.out.println("5. Confirm Update");
+                    System.out.println("0. Cancel");
 
-        int edit = readIntRange("Select: ", 0, 5);
+                    int edit = readIntRange("Select: ", 0, 5);
 
-        switch (edit) {
-            case 1:
-                nameU = readText("New Name: ");
-                break;
+                    switch (edit) {
+                        case 1:
+                            nameU = readText("New Name: ");
+                            break;
 
-            case 2:
-                priceU = readDoubleRange("New Price: ", 0, Double.MAX_VALUE);
-                break;
+                        case 2:
+                            priceU = readDoubleRange("New Price: ", 0, Double.MAX_VALUE);
+                            break;
 
-            case 3:
-                stockU = readIntRange("New Stock: ", 0, Integer.MAX_VALUE);
-                break;
+                        case 3:
+                            stockU = readIntRange("New Stock: ", 0, Integer.MAX_VALUE);
+                            break;
 
-            case 4:
-                categoryU = readCategory();
-                break;
+                        case 4:
+                            categoryU = readCategory();
+                            break;
 
-            case 5:
-                concessionService.updateItem(updateIndex, nameU, priceU, stockU, categoryU);
-                System.out.println("Concession updated successfully.");
-                return;
+                        case 5:
+                            concessionService.updateItem(updateIndex, nameU, priceU, stockU, categoryU);
+                            System.out.println("Concession updated successfully.");
+                            return;
 
-            case 0:
-                System.out.println("Cancelled.");
-                return;
+                        case 0:
+                            System.out.println("Cancelled.");
+                            return;
 
-            default:
-                System.out.println("Invalid option.");
-        }
-    }
+                        default:
+                            System.out.println("Invalid option.");
+                    }
+                }
             case 4:
                 concessionService.displayConcessions();
                 if (concessionService.readAllItems().length == 0) {
@@ -497,119 +497,117 @@ private void reportMenu() {
                 String name = readText("Name: ");
                 
                 switch (role) {
-                case "ADMIN":
-                    userService.createUser(new Admin(username, password, name));
-                      System.out.println("Admin created successfully.");
-                    break;
+                    case "ADMIN":
+                        userService.createUser(new Admin(username, password, name));
+                        System.out.println("Admin created successfully.");
+                        break;
 
-                case "STAFF":
-                    int staffId = readInt("Staff ID: ");
-                    userService.createUser(new Staff(username, password, name, staffId));
-                      System.out.println("Staff created successfully.");
-                    break;
+                    case "STAFF":
+                        int staffId = readInt("Staff ID: ");
+                        userService.createUser(new Staff(username, password, name, staffId));
+                        System.out.println("Staff created successfully.");
+                        break;
 
-                case "CUSTOMER":
-                    
-                    userService.createUser(new Customer(username, password, name));
-                      System.out.println("Customer created successfully.");
-                    break;
+                    case "CUSTOMER":
+                        
+                        userService.createUser(new Customer(username, password, name));
+                        System.out.println("Customer created successfully.");
+                        break;
 
-                default:
-                    System.out.println("Invalid role.");
-                    return;
-            }
+                    default:
+                        System.out.println("Invalid role.");
+                        return;
+                }
               
                 break;
 
             case 2:
-               System.out.println("\n[View Users]");
-               while (true) {
-                System.out.println("\n=========== USER VIEW MENU ===========");
-                System.out.println("1. Admins");
-                System.out.println("2. Staff");
-                System.out.println("3. Customers");
-                System.out.println("4. All Users");
-                System.out.println("0. Back");
-                System.out.println("======================================");
+                System.out.println("\n[View Users]");
+                while (true) {
+                    System.out.println("\n=========== USER VIEW MENU ===========");
+                    System.out.println("1. Admins");
+                    System.out.println("2. Staff");
+                    System.out.println("3. Customers");
+                    System.out.println("4. All Users");
+                    System.out.println("0. Back");
+                    System.out.println("======================================");
 
-                int choice = readIntRange("Select: ", 0, 4);
-                if (choice == 0) break;
-                System.out.println();
-                userService.displayUsersByCategory(choice);
-               }
+                    int choice = readIntRange("Select: ", 0, 4);
+                    if (choice == 0) break;
+                    System.out.println();
+                    userService.displayUsersByCategory(choice);
+                }
                 break;
                
             case 3:
+                System.out.println("\n[Update User]");
+                userService.displayUsersByCategory(4);
 
-    System.out.println("\n[Update User]");
-    userService.displayUsersByCategory(4);
+                if (userService.readAllUsers().length == 0) {
+                    System.out.println("No users available.");
+                    return;
+                }
 
-    if (userService.readAllUsers().length == 0) {
-        System.out.println("No users available.");
-        return;
-    }
+                int index = selectUserIndexFromList();
+                if (index < 0) return;
 
-    int index = selectUserIndexFromList();
-    if (index < 0) return;
+                User u = userService.readUserByIndex(index);
 
-    User u = userService.readUserByIndex(index);
+                while (true) {
+                    System.out.println("\n=== EDIT USER ===");
+                    System.out.println("1. Name: " + u.getName());
+                    System.out.println("2. Password: " + u.getPassword());
+                    System.out.println("3. Role: " + getRole(u));
+                    System.out.println("0. Confirm & Save");
 
-    while (true) {
-        System.out.println("\n=== EDIT USER ===");
-        System.out.println("1. Name: " + u.getName());
-        System.out.println("2. Password: " + u.getPassword());
-        System.out.println("3. Role: " + getRole(u));
-        System.out.println("0. Confirm & Save");
+                    int edit = readIntRange("Select: ", 0, 3);
 
-        int edit = readIntRange("Select: ", 0, 3);
+                    switch (edit) {
+                        case 1:
+                            u.setName(readText("New name: "));
+                            break;
 
-        switch (edit) {
-            case 1:
-                u.setName(readText("New name: "));
-                break;
+                        case 2:
+                            u.setPassword(readPassword());
+                            break;
 
-            case 2:
-                u.setPassword(readPassword());
-                break;
+                        case 3:
+                            changeUserRole(index, u);
+                            break;
 
-            case 3:
-                changeUserRole(index, u);
-                break;
+                        case 0:
+                            // save back (important)
+                            userService.updateUserName(index, u.getName());
+                            userService.updateUserPassword(index, u.getPassword());
+                            System.out.println("User updated successfully.");
+                            return;
 
-            case 0:
-                // save back (important)
-                userService.updateUserName(index, u.getName());
-                userService.updateUserPassword(index, u.getPassword());
-                System.out.println("User updated successfully.");
-                return;
-
-            default:
-                System.out.println("Invalid option.");
-        }
-    }
+                        default:
+                            System.out.println("Invalid option.");
+                    }
+                }
             case 4:
+                System.out.println("\n[Delete User]");
 
-    System.out.println("\n[Delete User]");
+                int deleteIndex = selectUserIndexFromList();
+                if (deleteIndex < 0) return;
 
-    int deleteIndex = selectUserIndexFromList();
-    if (deleteIndex < 0) return;
+                System.out.print("Confirm delete? (Y/N): ");
+                String confirm = scanner.nextLine();
 
-    System.out.print("Confirm delete? (Y/N): ");
-    String confirm = scanner.nextLine();
+                if (!confirm.equalsIgnoreCase("Y")) {
+                    System.out.println("Cancelled.");
+                    return;
+                }
 
-    if (!confirm.equalsIgnoreCase("Y")) {
-        System.out.println("Cancelled.");
-        return;
+                userService.deleteUser(deleteIndex);
+                System.out.println("User deleted successfully.");
+                break;
+                        default:
+                            System.out.println("Invalid option.");
+
+                        }
     }
-
-    userService.deleteUser(deleteIndex);
-    System.out.println("User deleted successfully.");
-    break;
-            default:
-                System.out.println("Invalid option.");
-
-            }
-}
     
     private int readInt(String prompt) {
         while (true) {
@@ -621,18 +619,20 @@ private void reportMenu() {
             }
         }
     }
+
     private int readIntRange(String prompt, int min, int max) {
-    while (true) {
-        int value = readInt(prompt);
+        while (true) {
+            int value = readInt(prompt);
 
-        if (value < min || value > max) {
-            System.out.println("Must be between " + min + " and " + max);
-            continue;
+            if (value < min || value > max) {
+                System.out.println("Must be between " + min + " and " + max);
+                continue;
+            }
+
+            return value;
         }
-
-        return value;
     }
-}
+
     private double readDoubleRange(String prompt, double min, double max) {
         while (true) {
             double value = readDouble(prompt);
@@ -645,6 +645,7 @@ private void reportMenu() {
             return value;
         }
     }
+
     private double readDouble(String prompt) {
         while (true) {
             try {
@@ -655,6 +656,7 @@ private void reportMenu() {
             }
         }
     }
+
     private String readText(String prompt) {
         while (true) {
             try {
@@ -665,19 +667,21 @@ private void reportMenu() {
             }
         }
     }
+
     private String readCategory() {
-    while (true) {
-        String category = readText("Category (FOOD/DRINK/SNACK): ").toUpperCase();
+        while (true) {
+            String category = readText("Category (FOOD/DRINK/SNACK): ").toUpperCase();
 
-        if (category.equals("FOOD") ||
-            category.equals("DRINK") ||
-            category.equals("SNACK")) {
-            return category;
+            if (category.equals("FOOD") ||
+                category.equals("DRINK") ||
+                category.equals("SNACK")) {
+                return category;
+            }
+
+            System.out.println("Invalid category! Only FOOD / DRINK / SNACK allowed.");
         }
-
-        System.out.println("Invalid category! Only FOOD / DRINK / SNACK allowed.");
     }
-}
+
     private int chooseIndex(String prompt, int length) {
         while (true) {
             if (length <= 0) {
@@ -695,189 +699,196 @@ private void reportMenu() {
 
         
     }
+    
     private String readAgeRating() {
-    while (true) {
-        System.out.println("\nSelect Age Rating:");
-        System.out.println("1. U (General)");
-        System.out.println("2. P13 (Parental Guidance 13)");
-        System.out.println("3. 18 (18+)");
-        System.out.println("0. Cancel");
+        while (true) {
+            System.out.println("\nSelect Age Rating:");
+            System.out.println("1. U (General)");
+            System.out.println("2. P13 (Parental Guidance 13)");
+            System.out.println("3. 18 (18+)");
+            System.out.println("0. Cancel");
 
-        int choice = readIntRange("Choose: ", 0, 3);
+            int choice = readIntRange("Choose: ", 0, 3);
+
+            switch (choice) {
+                case 1: return "U";
+                case 2: return "P13";
+                case 3: return "18";
+                case 0:
+                    System.out.println("Cancelled");
+                    return null;
+                default:
+                    System.out.println("Invalid option");
+            }
+        }
+    }
+
+    private int readDuration() {
+        return readIntRange("Duration (60–300 mins): ", 1, 300);
+    }
+
+    private String readMovieTitle() {
+        while (true) {
+            String title = readText("Title: ");
+
+            if (title == null || title.trim().isEmpty()) {
+                System.out.println("Title cannot be empty!");
+                continue;
+            }
+
+            return title.trim();
+        }
+    }
+            
+    private String readGenre() {
+        while (true) {
+            String genre = readText("Genre: ");
+
+            // not null / empty check
+            if (genre == null || genre.trim().isEmpty()) {
+                System.out.println("Genre cannot be empty!");
+                continue;
+            }
+
+            // only letters + space allowed
+            if (!genre.matches("[a-zA-Z ]+")) {
+                System.out.println("Invalid genre! Only letters and space allowed.");
+                continue;
+            }
+
+            return genre.trim();
+        }
+    }   
+
+    private String readDate() {
+        while (true) {
+            try {
+                System.out.print("Date (YYYY-MM-DD): ");
+                String input = scanner.nextLine();
+
+                LocalDate date = LocalDate.parse(input); 
+                return date.toString();
+
+            } catch (Exception e) {
+                System.out.println("Invalid date format! Use YYYY-MM-DD.");
+            }
+        }
+    }
+    private String readTime() {
+        while (true) {
+            try {
+                System.out.print("Time (HH:mm): ");
+                String input = scanner.nextLine();
+
+                LocalTime time = LocalTime.parse(input); 
+                return time.toString();
+
+            } catch (Exception e) {
+                System.out.println("Invalid time format! Use HH:mm (24-hour).");
+            }
+        }
+    }
+
+    private String readRole() {
+        while (true) {
+            String role = readText("Role (ADMIN/STAFF/CUSTOMER): ").toUpperCase().trim();
+
+            if (role.equals("ADMIN") ||
+                role.equals("STAFF") ||
+                role.equals("CUSTOMER")) {
+                return role;
+            }
+
+            System.out.println("Invalid role! Only ADMIN / STAFF / CUSTOMER allowed.");
+        }
+    }
+
+    private String readPassword() {
+        while (true) {
+            String pw = readText("Password: ");
+
+            if (pw.length() < 2) {
+                System.out.println("Password too short!");
+            } 
+            else if (pw.length() > 12) {
+                System.out.println("Password too long! Max 12 characters.");
+            } 
+            else if (pw.contains(" ")) {
+                System.out.println("Password cannot contain spaces!");
+            } 
+            else {
+                return pw; 
+            }
+        }
+    }
+
+    private int selectUserIndexFromList() {
+        System.out.println("\nSelect user type:");
+        System.out.println("1. Admin");
+        System.out.println("2. Staff");
+        System.out.println("3. Customer");
+        System.out.println("4. All");
+
+        int type = readIntRange("Select: ", 1, 4);
+
+        int[] map = userService.getFilteredIndexes(type);
+
+        if (map.length == 0) {
+            System.out.println("No users.");
+            return -1;
+        }
+
+        for (int i = 0; i < map.length; i++) {
+            User u = userService.readUserByIndex(map[i]);
+            System.out.println((i + 1) + ". " + u.getUsername());
+        }
+
+        int selected = readIntRange("Select: ", 1, map.length);
+
+        return map[selected - 1];
+    }
+
+    private String getRole(User u) {
+        if (u instanceof Admin) return "ADMIN";
+        if (u instanceof Staff) return "STAFF";
+        if (u instanceof Customer) return "CUSTOMER";
+        return "UNKNOWN";
+    }
+    
+    private void changeUserRole(int index, User oldUser) {
+
+        System.out.println("Select new role:");
+        System.out.println("1. Admin");
+        System.out.println("2. Staff");
+        System.out.println("3. Customer");
+
+        int choice = readIntRange("Select: ", 1, 3);
+
+        User newUser;
+
+        String username = oldUser.getUsername();
+        String password = oldUser.getPassword();
+        String name = oldUser.getName();
 
         switch (choice) {
-            case 1: return "U";
-            case 2: return "P13";
-            case 3: return "18";
-            case 0:
-                System.out.println("Cancelled");
-                return null;
+            case 1:
+                newUser = new Admin(username, password, name);
+                break;
+
+            case 2:
+                int staffId = readInt("Staff ID: ");
+                newUser = new Staff(username, password, name, staffId);
+                break;
+
+            case 3:
+                newUser = new Customer(username, password, name);
+                break;
+
             default:
-                System.out.println("Invalid option");
-        }
-    }
-}
-private int readDuration() {
-    return readIntRange("Duration (60–300 mins): ", 1, 300);
-}
-private String readMovieTitle() {
-    while (true) {
-        String title = readText("Title: ");
-
-        if (title == null || title.trim().isEmpty()) {
-            System.out.println("Title cannot be empty!");
-            continue;
+                return;
         }
 
-        return title.trim();
+        userService.replaceUser(index, newUser);
     }
-}
-        
-    
-
-private String readGenre() {
-    while (true) {
-        String genre = readText("Genre: ");
-
-        // not null / empty check
-        if (genre == null || genre.trim().isEmpty()) {
-            System.out.println("Genre cannot be empty!");
-            continue;
-        }
-
-        // only letters + space allowed
-        if (!genre.matches("[a-zA-Z ]+")) {
-            System.out.println("Invalid genre! Only letters and space allowed.");
-            continue;
-        }
-
-        return genre.trim();
-    }
-}   
-private String readDate() {
-    while (true) {
-        try {
-            System.out.print("Date (YYYY-MM-DD): ");
-            String input = scanner.nextLine();
-
-            LocalDate date = LocalDate.parse(input); 
-            return date.toString();
-
-        } catch (Exception e) {
-            System.out.println("Invalid date format! Use YYYY-MM-DD.");
-        }
-    }
-}
-private String readTime() {
-    while (true) {
-        try {
-            System.out.print("Time (HH:mm): ");
-            String input = scanner.nextLine();
-
-            LocalTime time = LocalTime.parse(input); 
-            return time.toString();
-
-        } catch (Exception e) {
-            System.out.println("Invalid time format! Use HH:mm (24-hour).");
-        }
-    }
-}
-private String readRole() {
-    while (true) {
-        String role = readText("Role (ADMIN/STAFF/CUSTOMER): ").toUpperCase().trim();
-
-        if (role.equals("ADMIN") ||
-            role.equals("STAFF") ||
-            role.equals("CUSTOMER")) {
-            return role;
-        }
-
-        System.out.println("Invalid role! Only ADMIN / STAFF / CUSTOMER allowed.");
-    }
-}
-private String readPassword() {
-   while (true) {
-    String pw = readText("Password: ");
-
-    if (pw.length() < 2) {
-        System.out.println("Password too short!");
-    } 
-    else if (pw.length() > 12) {
-        System.out.println("Password too long! Max 12 characters.");
-    } 
-    else if (pw.contains(" ")) {
-        System.out.println("Password cannot contain spaces!");
-    } 
-    else {
-        return pw; 
-    }
-}
-}
-private int selectUserIndexFromList() {
-    System.out.println("\nSelect user type:");
-    System.out.println("1. Admin");
-    System.out.println("2. Staff");
-    System.out.println("3. Customer");
-    System.out.println("4. All");
-
-    int type = readIntRange("Select: ", 1, 4);
-
-int[] map = userService.getFilteredIndexes(type);
-
-if (map.length == 0) {
-    System.out.println("No users.");
-    return -1;
-}
-
-for (int i = 0; i < map.length; i++) {
-    User u = userService.readUserByIndex(map[i]);
-    System.out.println((i + 1) + ". " + u.getUsername());
-}
-
-int selected = readIntRange("Select: ", 1, map.length);
-
-return map[selected - 1];
-}
-private String getRole(User u) {
-    if (u instanceof Admin) return "ADMIN";
-    if (u instanceof Staff) return "STAFF";
-    if (u instanceof Customer) return "CUSTOMER";
-    return "UNKNOWN";
-}
-private void changeUserRole(int index, User oldUser) {
-
-    System.out.println("Select new role:");
-    System.out.println("1. Admin");
-    System.out.println("2. Staff");
-    System.out.println("3. Customer");
-
-    int choice = readIntRange("Select: ", 1, 3);
-
-    User newUser;
-
-    String username = oldUser.getUsername();
-    String password = oldUser.getPassword();
-    String name = oldUser.getName();
-
-    switch (choice) {
-        case 1:
-            newUser = new Admin(username, password, name);
-            break;
-
-        case 2:
-            int staffId = readInt("Staff ID: ");
-            newUser = new Staff(username, password, name, staffId);
-            break;
-
-        case 3:
-            newUser = new Customer(username, password, name);
-            break;
-
-        default:
-            return;
-    }
-
-    userService.replaceUser(index, newUser);
-}
 
 }

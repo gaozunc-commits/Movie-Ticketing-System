@@ -1,10 +1,16 @@
 package model;
 
 public class ConcessionItem {
+
     private String name;
     private double price;
     private int stock;
     private String category; // FOOD / DRINK / SNACK
+
+// git change on here
+    private static final String FOOD = "FOOD";
+    private static final String DRINK = "DRINK";
+    private static final String SNACK = "SNACK";
 
     public ConcessionItem(String name, double price, int stock, String category) {
         setName(name);
@@ -52,14 +58,17 @@ public class ConcessionItem {
 
     public void setCategory(String category) {
         if (category == null ||
-            !(category.equalsIgnoreCase("FOOD") ||
-              category.equalsIgnoreCase("DRINK") ||
-              category.equalsIgnoreCase("SNACK"))) {
+                !(category.equalsIgnoreCase(FOOD) ||
+                  category.equalsIgnoreCase(DRINK) ||
+                  category.equalsIgnoreCase(SNACK))) {
+
             throw new IllegalArgumentException("Category must be FOOD, DRINK, or SNACK.");
         }
+
         this.category = category.toUpperCase();
     }
 
+    @Override
     public String toString() {
         return String.format("[%s] %s - RM %.2f | Stock: %d",
                 category, name, price, stock);

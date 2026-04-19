@@ -5,7 +5,7 @@ import model.Customer;
 import model.Staff;
 import model.User;
 import util.FileHandler;
-import util.InputValidator;
+
 
 public class UserService {
 
@@ -228,164 +228,169 @@ public class UserService {
     }
 
     // ================= DISPLAY =================
-public void displayUsersByCategory(int choice) {
-    switch (choice) {
-        case 1:
-            displayAdmins();
-            break;
-        case 2:
-            displayStaff();
-            break;
-        case 3:
-            displayCustomers();
-            break;
-        case 4:
-            displayAllUsers();
-            break;
-        case 0:
-            return;
-        default:
-            System.out.println("Invalid option");
-    }
-}
-
-private void displayAdmins() {
-    System.out.println("\n--- ADMIN LIST ---");
-    System.out.println("No | Username | Name");
-    System.out.println("--------------------------------");
-
-    boolean found = false;
-    int no = 1;
-
-    for (int i = 0; i < userCount; i++) {
-        if (users[i] instanceof Admin) {
-
-            System.out.printf("%d | %s | %s%n",
-                    no++,
-                    users[i].getUsername(),
-                    users[i].getName());
-
-            System.out.println("--------------------------------");
-            found = true;
+    public void displayUsersByCategory(int choice) {
+        switch (choice) {
+            case 1:
+                displayAdmins();
+                break;
+            case 2:
+                displayStaff();
+                break;
+            case 3:
+                displayCustomers();
+                break;
+            case 4:
+                displayAllUsers();
+                break;
+            case 0:
+                return;
+            default:
+                System.out.println("Invalid option");
         }
     }
 
-    if (!found) {
-        System.out.println("No admin found.");
-    }
-}
-private void displayStaff() {
-    System.out.println("\n--- STAFF LIST ---");
-    System.out.println("No | Username | Name | Staff ID");
-    System.out.println("--------------------------------");
-
-    boolean found = false;
-    int no = 1;
-
-    for (int i = 0; i < userCount; i++) {
-        if (users[i] instanceof Staff) {
-
-            Staff s = (Staff) users[i];
-
-            System.out.printf("%d | %s | %s | %d%n",
-                    no++,
-                    s.getUsername(),
-                    s.getName(),
-                    s.getStaffId());
-
-            System.out.println("--------------------------------");
-            found = true;
-        }
-    }
-
-    if (!found) {
-        System.out.println("No staff found.");
-    }
-}
-
-
-private void displayCustomers() {
-    System.out.println("\n--- CUSTOMER LIST ---");
-    System.out.println("No | Username | Name");
-    System.out.println("--------------------------------");
-
-    boolean found = false;
-    int no = 1;
-
-    for (int i = 0; i < userCount; i++) {
-        if (users[i] instanceof Customer) {
-
-            System.out.printf("%d | %s | %s%n",
-                    no++,
-                    users[i].getUsername(),
-                    users[i].getName());
-
-            System.out.println("--------------------------------");
-            found = true;
-        }
-    }
-
-    if (!found) {
-        System.out.println("No customer found.");
-    }
-}
-    private void displayAllUsers() {
-    System.out.println("\n--- ALL USERS LIST ---");
-    System.out.println("No | Role | Username | Name");
-    System.out.println("--------------------------------");
-
-    boolean found = false;
-    int no = 1;
-
-    for (int i = 0; i < userCount; i++) {
-
-        User u = users[i];
-
-        String role = (u instanceof Admin) ? "ADMIN"
-                   : (u instanceof Staff) ? "STAFF"
-                   : "CUSTOMER";
-
-        System.out.printf("%d | %s | %s | %s%n",
-                no++,
-                role,
-                u.getUsername(),
-                u.getName());
-
+    private void displayAdmins() {
+        System.out.println("\n--- ADMIN LIST ---");
+        System.out.println("No | Username | Name");
         System.out.println("--------------------------------");
-        found = true;
+
+        boolean found = false;
+        int no = 1;
+
+        for (int i = 0; i < userCount; i++) {
+            if (users[i] instanceof Admin) {
+
+                System.out.printf("%d | %s | %s%n",
+                        no++,
+                        users[i].getUsername(),
+                        users[i].getName());
+
+                System.out.println("--------------------------------");
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No admin found.");
+        }
     }
 
-    if (!found) {
-        System.out.println("No users found.");
+    private void displayStaff() {
+        System.out.println("\n--- STAFF LIST ---");
+        System.out.println("No | Username | Name | Staff ID");
+        System.out.println("--------------------------------");
+
+        boolean found = false;
+        int no = 1;
+
+        for (int i = 0; i < userCount; i++) {
+            if (users[i] instanceof Staff) {
+
+                Staff s = (Staff) users[i];
+
+                System.out.printf("%d | %s | %s | %d%n",
+                        no++,
+                        s.getUsername(),
+                        s.getName(),
+                        s.getStaffId());
+
+                System.out.println("--------------------------------");
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No staff found.");
+        }
     }
-}
-public int[] getFilteredIndexes(int type) {
 
-    int[] temp = new int[userCount];
-    int count = 0;
 
-    for (int i = 0; i < userCount; i++) {
+    private void displayCustomers() {
+        System.out.println("\n--- CUSTOMER LIST ---");
+        System.out.println("No | Username | Name");
+        System.out.println("--------------------------------");
 
-        if (type == 1 && users[i] instanceof Admin) temp[count++] = i;
-        else if (type == 2 && users[i] instanceof Staff) temp[count++] = i;
-        else if (type == 3 && users[i] instanceof Customer) temp[count++] = i;
-        else if (type == 4) temp[count++] = i;
+        boolean found = false;
+        int no = 1;
+
+        for (int i = 0; i < userCount; i++) {
+            if (users[i] instanceof Customer) {
+
+                System.out.printf("%d | %s | %s%n",
+                        no++,
+                        users[i].getUsername(),
+                        users[i].getName());
+
+                System.out.println("--------------------------------");
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No customer found.");
+        }
     }
 
-    int[] result = new int[count];
-    for (int i = 0; i < count; i++) {
-        result[i] = temp[i];
+    private void displayAllUsers() {
+        System.out.println("\n--- ALL USERS LIST ---");
+        System.out.println("No | Role | Username | Name");
+        System.out.println("--------------------------------");
+
+        boolean found = false;
+        int no = 1;
+
+        for (int i = 0; i < userCount; i++) {
+
+            User u = users[i];
+
+            String role = (u instanceof Admin) ? "ADMIN"
+                    : (u instanceof Staff) ? "STAFF"
+                    : "CUSTOMER";
+
+            System.out.printf("%d | %s | %s | %s%n",
+                    no++,
+                    role,
+                    u.getUsername(),
+                    u.getName());
+
+            System.out.println("--------------------------------");
+            found = true;
+        }
+
+        if (!found) {
+            System.out.println("No users found.");
+        }
     }
 
-    return result;
-}
-public void replaceUser(int index, User newUser) {
-    users[index] = newUser;
-    save();
-}
-public void updateUserPassword(int index, String newPassword) {
-    User u = readUserByIndex(index);
-    u.setPassword(newPassword);
-    save();
-}
+    public int[] getFilteredIndexes(int type) {
+
+        int[] temp = new int[userCount];
+        int count = 0;
+
+        for (int i = 0; i < userCount; i++) {
+
+            if (type == 1 && users[i] instanceof Admin) temp[count++] = i;
+            else if (type == 2 && users[i] instanceof Staff) temp[count++] = i;
+            else if (type == 3 && users[i] instanceof Customer) temp[count++] = i;
+            else if (type == 4) temp[count++] = i;
+        }
+
+        int[] result = new int[count];
+        for (int i = 0; i < count; i++) {
+            result[i] = temp[i];
+        }
+
+        return result;
+    }
+    
+    public void replaceUser(int index, User newUser) {
+        users[index] = newUser;
+        save();
+    }
+
+    public void updateUserPassword(int index, String newPassword) {
+        User u = readUserByIndex(index);
+        u.setPassword(newPassword);
+        save();
+    }
 }

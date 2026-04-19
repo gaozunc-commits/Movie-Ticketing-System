@@ -2,6 +2,7 @@ package main;
 
 import model.*;
 import service.*;
+import util.InputValidator;
 
 import java.util.Scanner;
 
@@ -48,6 +49,7 @@ public class CustomerMenuHandler {
         }
     }
 
+    @Override
     public String toString() {
         return "\n--- CUSTOMER MENU ---\n"
                 + "1. Browse Movies\n"
@@ -58,6 +60,7 @@ public class CustomerMenuHandler {
     }
 
     private void placeOrder(Customer customer) {
+
         Showtime showtime = null;
         String seat = "";
         boolean seatBooked = false;
@@ -68,6 +71,11 @@ public class CustomerMenuHandler {
             showtime = bookingService.readShowtimeByIndex(
                     safeIndex("Select showtime: ", bookingService.readAllShowtimes().length)
             );
+
+            if (showtime == null) return;
+
+            // UX 
+            System.out.println("Enter seat (Example: A1, B2)");
 
             showtime.displaySeats();
 
@@ -81,10 +89,10 @@ public class CustomerMenuHandler {
                         bookingService.persistShowtimes();
                         break;
                     } else {
-                        System.out.println("Seat taken. Try another seat.");
+                        System.out.println("Seat taken. Try another.");
                     }
                 } catch (Exception e) {
-                    System.out.println("Invalid seat format. Try again.");
+                    System.out.println("Invalid seat format.");
                 }
             }
 
@@ -92,10 +100,10 @@ public class CustomerMenuHandler {
             Ticket ticket = bookingService.createTicketForSeat(showtime, seat);
             order.addTicket(ticket);
 
-            // ===== CONCESSION LOOP =====
+
             while (true) {
                 System.out.print("Add concession? (y/n): ");
-                String ans = scanner.nextLine().trim().toLowerCase();
+                String ans = readText("").trim().toLowerCase();
 
                 if (ans.equals("n")) break;
                 if (!ans.equals("y")) {
@@ -104,6 +112,11 @@ public class CustomerMenuHandler {
                 }
 
                 concessionService.displayConcessions();
+
+                if (concessionService.readAllItems().length == 0) {
+                    System.out.println("No items available.");
+                    continue;
+                }
 
                 int idx = safeIndex("Index: ", concessionService.readAllItems().length);
                 if (idx == -1) continue;
@@ -138,16 +151,17 @@ public class CustomerMenuHandler {
                 System.out.println("Added.");
             }
 
-            // ===== PAYMENT =====
-            Payment payment = paymentService.processPaymentByChoice(order.getTotalPrice(), scanner);
+            Payment payment = paymentService.processPaymentByChoice(
+                    order.getTotalPrice(), scanner
+            );
+
             order.setPaymentMethod(payment.getMethod());
-
-
             bookingService.persistOrder(order);
 
             System.out.println("Order completed: " + order.getOrderId());
 
         } catch (Exception e) {
+            // rollback seat
             if (showtime != null && seatBooked) {
                 showtime.releaseSeat(seat);
                 bookingService.persistShowtimes();
@@ -164,7 +178,9 @@ public class CustomerMenuHandler {
 
         while (true) {
             int i = readInt(msg) - 1;
+
             if (i >= 0 && i < size) return i;
+
             System.out.println("Invalid index, try again");
         }
     }
@@ -177,13 +193,16 @@ public class CustomerMenuHandler {
         bookingService.displayShowtimes();
     }
 
-   
-
+    // InputValidator
     private int readInt(String msg) {
         while (true) {
             try {
                 System.out.print(msg);
-                return Integer.parseInt(scanner.nextLine());
+                return InputValidator.parseIntInRange(
+                        scanner.nextLine(),
+                        Integer.MIN_VALUE,
+                        Integer.MAX_VALUE
+                );
             } catch (Exception e) {
                 System.out.println("Invalid number");
             }

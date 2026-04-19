@@ -68,22 +68,18 @@ public class Order {
     totalPrice += item.getPrice() * quantity;
 }
 
-    // Getter for order ID.
     public String getOrderId() {
         return orderId;
     }
 
-    // Getter for customer username linked to the order.
     public String getCustomerUsername() {
         return customerUsername;
     }
 
-    // Getter for showtime ID linked to the order.
     public String getShowtimeId() {
         return showtimeId;
     }
 
-    // Getter for ticket items in this order.
     public Ticket[] getTickets() {
         Ticket[] copied = new Ticket[ticketCount];
         for (int i = 0; i < ticketCount; i++) {
@@ -92,7 +88,6 @@ public class Order {
         return copied;
     }
 
-    // Getter for concession items in this order.
     public ConcessionItem[] getConcessionItems() {
         ConcessionItem[] copied = new ConcessionItem[concessionItemCount];
         for (int i = 0; i < concessionItemCount; i++) {
@@ -101,12 +96,10 @@ public class Order {
         return copied;
     }
 
-    // Getter for total order price.
     public double getTotalPrice() {
         return totalPrice;
     }
 
-    // Setter for total order price when loading persisted data.
     public void setTotalPrice(double totalPrice) throws ArrayIndexOutOfBoundsException {
         if (totalPrice < 0) {
             throw new ArrayIndexOutOfBoundsException("Total price cannot be negative.");
@@ -114,12 +107,10 @@ public class Order {
         this.totalPrice = totalPrice;
     }
 
-    // Getter for payment method used by the order.
     public String getPaymentMethod() {
         return paymentMethod;
     }
 
-    // Setter for payment method.
     public void setPaymentMethod(String paymentMethod) {
         if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
             this.paymentMethod = "Unknown";
@@ -128,12 +119,10 @@ public class Order {
         this.paymentMethod = paymentMethod.trim();
     }
 
-    // Getter for purchase date and time.
     public String getPurchasedAt() {
         return purchasedAt;
     }
 
-    // Setter for purchase date and time.
     public void setPurchasedAt(String purchasedAt) {
         if (purchasedAt == null || purchasedAt.trim().isEmpty()) {
             this.purchasedAt = "N/A";

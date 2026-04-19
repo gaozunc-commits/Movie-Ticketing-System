@@ -1,3 +1,0 @@
-ADMIN|admin|123|System Admin
-ADMIN|123|12|LOA
-ADMIN|Peter|abcsef|peteer

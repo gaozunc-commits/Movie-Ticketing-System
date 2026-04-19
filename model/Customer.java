@@ -2,7 +2,6 @@ package model;
 
 public class Customer extends User {
 
-    // Parameterized constructor for customer user creation.
     public Customer(String username, String password, String name) {
         super(username, password, name, "CUSTOMER");
     }
@@ -15,4 +14,8 @@ public class Customer extends User {
         System.out.println("0. Logout");
     }
 
+    @Override
+    public String toString() {
+        return "Customer: " + getName() + " (" + getUsername() + ")";
+    }
 }
