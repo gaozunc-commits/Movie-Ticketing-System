@@ -7,6 +7,7 @@ import model.Hall;
 import model.Movie;
 import model.Showtime;
 import model.Staff;
+import model.User;
 import service.BookingService;
 import service.ConcessionService;
 import service.MovieService;
@@ -521,41 +522,78 @@ private void reportMenu() {
                 break;
 
             case 2:
-                System.out.println("\n[View Users]");
-                userService.displayUsers();
-                break;
+               System.out.println("\n[View Users]");
+               while (true) {
+                System.out.println("\n=========== USER VIEW MENU ===========");
+                System.out.println("1. Admins");
+                System.out.println("2. Staff");
+                System.out.println("3. Customers");
+                System.out.println("4. All Users");
+                System.out.println("0. Back");
+                System.out.println("======================================");
 
+                int choice = readIntRange("Select: ", 0, 4);
+                if (choice == 0) break;
+                System.out.println();
+                userService.displayUsersByCategory(choice);
+               }
+                break;
+               
             case 3:
-                System.out.println("\n[Update User Name]");
-                userService.displayUsers();
-                if (userService.readAllUsers().length == 0) {
-                    System.out.println("No users available.");
-                    return;
-                }
-                int updateIndex = chooseIndex("User index: ", userService.readAllUsers().length);
+            
+            System.out.println("\n[Update User Name]");
+            userService.displayUsersByCategory(4); // show ALL users
+
+            if (userService.readAllUsers().length == 0) {
+                System.out.println("No users available.");
+                return;
+            }
+
+             int updateIndex = selectUserIndexFromList();
                 if (updateIndex < 0) return;
-                userService.updateUserName(updateIndex, readText("New name: "));
+
+                String newName;
+                while (true) {
+                    newName = readText("New name: ");
+
+                    if (newName == null || newName.trim().isEmpty()) {
+                        System.out.println("Name cannot be empty!");
+                    }
+                    else if (!newName.matches("[a-zA-Z ]+")) {
+                        System.out.println("Name only allows letters and space!");
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                userService.updateUserName(updateIndex, newName.trim());
                 System.out.println("User updated successfully.");
                 break;
-
             case 4:
-                System.out.println("\n[Delete User]");
-                userService.displayUsers();
-                if (userService.readAllUsers().length == 0) {
-                    System.out.println("No users available.");
-                    return;
-                }
-                int deleteIndex = chooseIndex("User index: ", userService.readAllUsers().length);
-                if (deleteIndex < 0) return;
-                userService.deleteUser(deleteIndex);
-                System.out.println("User deleted successfully.");
-                break;
-                
-            default:
-                System.out.println("Invalid option.");
-        }
+
+    System.out.println("\n[Delete User]");
+
+    int deleteIndex = selectUserIndexFromList();
+    if (deleteIndex < 0) return;
+
+    System.out.print("Confirm delete? (Y/N): ");
+    String confirm = scanner.nextLine();
+
+    if (!confirm.equalsIgnoreCase("Y")) {
+        System.out.println("Cancelled.");
+        return;
     }
 
+    userService.deleteUser(deleteIndex);
+    System.out.println("User deleted successfully.");
+    break;
+            default:
+                System.out.println("Invalid option.");
+
+            }
+}
+    
     private int readInt(String prompt) {
         while (true) {
             try {
@@ -741,13 +779,45 @@ private String readRole() {
     }
 }
 private String readPassword() {
-    while (true) {
-        String pw = readText("Password (min 2 chars): ");
-        if (pw.length() < 2) {
-            System.out.println("Password too short!");
-            continue;
-        }
-        return pw;
+   while (true) {
+    String pw = readText("Password: ");
+
+    if (pw.length() < 2) {
+        System.out.println("Password too short!");
+    } 
+    else if (pw.length() > 12) {
+        System.out.println("Password too long! Max 12 characters.");
+    } 
+    else if (pw.contains(" ")) {
+        System.out.println("Password cannot contain spaces!");
+    } 
+    else {
+        return pw; 
     }
 }
 }
+private int selectUserIndexFromList() {
+    System.out.println("\nSelect user type:");
+    System.out.println("1. Admin");
+    System.out.println("2. Staff");
+    System.out.println("3. Customer");
+    System.out.println("4. All");
+
+    int type = readIntRange("Select: ", 1, 4);
+
+int[] map = userService.getFilteredIndexes(type);
+
+if (map.length == 0) {
+    System.out.println("No users.");
+    return -1;
+}
+
+for (int i = 0; i < map.length; i++) {
+    User u = userService.readUserByIndex(map[i]);
+    System.out.println((i + 1) + ". " + u.getUsername());
+}
+
+int selected = readIntRange("Select: ", 1, map.length);
+
+return map[selected - 1];
+}}
