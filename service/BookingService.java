@@ -573,7 +573,7 @@ public void displayTimetableMatrix(String date) {
     System.out.print(String.format("%-8s", "Time"));
 
     for (String t : slots) {
-        System.out.print(String.format("%-6s", t));
+        System.out.print(String.format("%-8s", t));
     }
     System.out.println();
 
@@ -586,7 +586,7 @@ public void displayTimetableMatrix(String date) {
 
             boolean occupied = isOccupied(h, date, slot);
 
-            System.out.print(String.format("%-6s", occupied ? "X" : "O"));
+            System.out.print(String.format("%-8s", occupied ? "X" : "O"));
         }
 
         System.out.println();
@@ -594,10 +594,10 @@ public void displayTimetableMatrix(String date) {
 }
     public void displayShowtimes() {
         sortShowtimes();
-        System.out.println("\n----------------------------------------------------");
+        System.out.println("\n-----------------------------------------------------------");
         System.out.printf("%-5s %-20s %-6s %-12s %-10s %-10s\n",
                 "No", "Movie", "Hall", "Date", "Start", "End");
-        System.out.println("----------------------------------------------------");
+        System.out.println("-----------------------------------------------------------");
 
         for (int i = 0; i < showtimeCount; i++) {
             Showtime s = showtimes[i];
