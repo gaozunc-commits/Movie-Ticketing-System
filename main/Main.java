@@ -28,6 +28,17 @@ public class Main {
     public static void main(String[] args) {
 
         System.out.println("#######################################################");
+        System.out.println("#         _____ _                                     #");
+        System.out.println("#        / ____(_)                                    #");
+        System.out.println("#       | |     _ _ __   ___ _ __ ___   __ _          #");
+        System.out.println("#       | |    | | '_ \\ / _ \\ '_ ` _ \\ / _` |         #");
+        System.out.println("#       | |____| | | | |  __/ | | | | | (_| |         #");
+        System.out.println("#        \\_____|_|_| |_|\\___|_| |_| |_|\\__,_|         #");
+        System.out.println("#                                                     #");
+        System.out.println("#               CINEMA TICKETING SYSTEM               #");
+        System.out.println("#                                                     #");
+        System.out.println("#     Now Showing       Book Tickets      Trailers    #");
+        System.out.println("#                                                     #");
         System.out.println("#         CINEMA TICKETING SYSTEM                    #");
         System.out.println("#######################################################\n");
 
@@ -69,7 +80,7 @@ public class Main {
                         break;
                 }
 
-                // 🔥 BACK TO LOGIN PAGE
+                //  BACK TO LOGIN PAGE
                 System.out.println("\nLogged out. Back to login menu...\n");
 
             } catch (Exception e) {
