@@ -23,6 +23,8 @@ public class Showtime {
         this.endTime = endTime;
 
         this.seats = new boolean[hall.getSeatMap().length][hall.getSeatMap()[0].length];
+
+        resetSeats();
     }
 
     // ================= GETTERS =================
@@ -79,6 +81,7 @@ public class Showtime {
 
         seats[row][col] = true;
         return true;
+        
     }
 
     public void releaseSeat(String seat) {
@@ -91,8 +94,50 @@ public class Showtime {
     }
 
     // ================= SEAT PARSER (A1 -> [0][0]) =================
+    public String getBookedSeatsString() {
+    StringBuilder sb = new StringBuilder();
 
-    private int[] parseSeat(String seat) {
+    for (int i = 0; i < seats.length; i++) {
+        for (int j = 0; j < seats[i].length; j++) {
+            if (seats[i][j]) {
+                sb.append((char) ('A' + i))
+                  .append(j + 1)
+                  .append(",");
+            }
+        }
+    }
+
+    if (sb.length() > 0) {
+        sb.setLength(sb.length() - 1);
+    }
+
+    return sb.toString();
+}
+public void resetSeats() {
+    for (int i = 0; i < seats.length; i++) {
+        for (int j = 0; j < seats[i].length; j++) {
+            seats[i][j] = false;
+        }
+    }
+}
+public void loadBookedSeats(String data) {
+
+    resetSeats();
+
+    if (data == null || data.trim().isEmpty()) {
+        return;
+    }
+
+    String[] list = data.split(",");
+    for (String seat : list) {
+        seat = seat.trim();
+        if (seat.isEmpty()) continue;
+
+        int[] pos = parseSeat(seat);
+        seats[pos[0]][pos[1]] = true;
+    }
+}
+    public int[] parseSeat(String seat) {
 
         if (seat == null || seat.length() < 2) {
             throw new IllegalArgumentException("Invalid seat format");
@@ -126,4 +171,5 @@ public class Showtime {
         }
         System.out.println();
     }
+    
 }

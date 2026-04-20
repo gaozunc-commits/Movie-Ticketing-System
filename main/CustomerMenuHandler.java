@@ -63,110 +63,110 @@ public class CustomerMenuHandler {
 
     private void placeOrder(Customer customer) {
 
-        Showtime showtime = null;
-        String seat = "";
-        boolean seatBooked = false;
+    Showtime showtime = null;
+    String seat = "";
+    boolean seatBooked = false;
 
-        try {
-            bookingService.displayShowtimes();
+    try {
+        bookingService.displayShowtimes();
 
-            int showtimeIndex = InputValidator.promptOneBasedIndex(
-                    scanner,
-                    "Select showtime: ",
-                    bookingService.readAllShowtimes().length
-            );
-            if (showtimeIndex < 0) {
-                return;
-            }
+        int showtimeIndex = InputValidator.promptOneBasedIndex(
+                scanner,
+                "Select showtime: ",
+                bookingService.readAllShowtimes().length
+        );
+        if (showtimeIndex < 0) return;
 
-            showtime = bookingService.readShowtimeByIndex(showtimeIndex);
+        showtime = bookingService.readShowtimeByIndex(showtimeIndex);
 
-            System.out.println("\n=== SELECT SEAT ===");
-            System.out.println("Enter seat (Example: A1, B2)");
+        System.out.println("\n=== SELECT SEAT ===");
+        showtime.displaySeats();
 
-            showtime.displaySeats();
+        while (true) {
+            seat = InputValidator.promptText(scanner, "Seat: ").trim().toUpperCase();
 
-            while (true) {
-                seat = InputValidator.promptText(scanner, "Seat: ").trim().toUpperCase();
-                try {
-                    InputValidator.validateSeatFormat(seat);
-                    if (showtime.bookSeat(seat)) {
-                        seatBooked = true;
-                        bookingService.persistShowtimes();
-                        break;
-                    }
-                    System.out.println("Seat taken. Try another.");
-                } catch (IllegalArgumentException ex) {
-                    System.out.println(ex.getMessage());
-                } catch (Exception ex) {
-                    System.out.println("Invalid seat selection.");
-                }
-            }
+            try {
+                InputValidator.validateSeatFormat(seat);
 
-            Order order = bookingService.createOrder(customer.getUsername(), showtime);
-            Ticket ticket = bookingService.createTicketForSeat(showtime, seat);
-            order.addTicket(ticket);
-
-            while (true) {
-                String addMore = InputValidator.promptText(scanner, "Add concession? (y/n): ").trim().toLowerCase();
-
-                if (addMore.equals("n")) {
+                if (showtime.bookSeat(seat)) {
+                    seatBooked = true;
+                    bookingService.persistShowtimes();
                     break;
                 }
-                if (!addMore.equals("y")) {
-                    System.out.println("Enter only y or n");
-                    continue;
-                }
 
-                concessionService.displayConcessions();
+                System.out.println("Seat taken. Try another.");
 
-                if (concessionService.readAllItems().length == 0) {
-                    System.out.println("No items available.");
-                    continue;
-                }
+            } catch (IllegalArgumentException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
 
-                int itemIndex = InputValidator.promptOneBasedIndex(
-                        scanner,
-                        "Index: ",
-                        concessionService.readAllItems().length
-                );
-                if (itemIndex < 0) {
-                    continue;
-                }
+        Order order = bookingService.createOrder(customer.getUsername(), showtime);
 
-                ConcessionItem item = concessionService.readItemByIndex(itemIndex);
+        Ticket ticket = bookingService.createTicketForSeat(showtime, seat);
+        order.addTicket(ticket);
 
-                if (item.getStock() <= 0) {
-                    System.out.println("Out of stock");
-                    continue;
-                }
+        while (true) {
+            String addMore = InputValidator.promptText(scanner, "Add concession? (y/n): ")
+                    .trim().toLowerCase();
 
-                int qty = InputValidator.promptIntInRange(scanner, "Qty: ", 1, item.getStock());
+            if (addMore.equals("n")) break;
 
-                concessionService.deductStock(itemIndex, qty);
-                order.addConcessionItem(item, qty);
-
-                System.out.println("Added.");
+            if (!addMore.equals("y")) {
+                System.out.println("Enter only y or n");
+                continue;
             }
 
-            Payment payment = paymentService.processPaymentByChoice(
-                    order.getTotalPrice(), scanner
+            concessionService.displayConcessions();
+
+            if (concessionService.readAllItems().length == 0) {
+                System.out.println("No items available.");
+                continue;
+            }
+
+            int itemIndex = InputValidator.promptOneBasedIndex(
+                    scanner,
+                    "Index: ",
+                    concessionService.readAllItems().length
             );
 
-            order.setPaymentMethod(payment.getMethod());
-            bookingService.persistOrder(order);
+            if (itemIndex < 0) continue;
 
-            System.out.println("Order completed: " + order.getOrderId());
+            ConcessionItem item = concessionService.readItemByIndex(itemIndex);
 
-        } catch (Exception e) {
-            if (showtime != null && seatBooked) {
-                showtime.releaseSeat(seat);
-                bookingService.persistShowtimes();
+            if (item.getStock() <= 0) {
+                System.out.println("Out of stock");
+                continue;
             }
-            throw e;
+
+            int qty = InputValidator.promptIntInRange(scanner, "Qty: ", 1, item.getStock());
+
+            concessionService.deductStock(itemIndex, qty);
+            order.addConcessionItem(item, qty);
+
+            System.out.println("Added.");
+        }
+
+        Payment payment = paymentService.processPaymentByChoice(
+                order.getTotalPrice(), scanner
+        );
+
+        order.setPaymentMethod(payment.getMethod());
+        bookingService.persistOrder(order);
+
+        System.out.println("Order completed: " + order.getOrderId());
+
+    } catch (Exception e) {
+
+        System.out.println("Booking failed: " + e.getMessage());
+
+        if (showtime != null && seatBooked) {
+            showtime.releaseSeat(seat);
+            bookingService.persistShowtimes();
+            System.out.println("Seat rollback successful.");
         }
     }
-
+}
     private void showMoviesAndShowtimes() {
         movieService.displayMovies();
         bookingService.displayShowtimes();

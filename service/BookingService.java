@@ -64,10 +64,6 @@ private int getColIndex(String seat) {
 }
     public Ticket createTicketForSeat(Showtime showtime, String seatNumber) {
 
-    if (showtime == null) {
-        throw new IllegalArgumentException("Showtime cannot be null.");
-    }
-
     int row = getRowIndex(seatNumber);
     int col = getColIndex(seatNumber);
 
@@ -93,6 +89,7 @@ private int getColIndex(String seat) {
         registerBookingIfAbsent(order);
         String[] allLines = OrderFileFormat.linesForAllOrders(orders, orderCount);
         FileHandler.overwriteFile(ORDER_FILE, allLines);
+        saveShowtimes();
     }
 
     /**
@@ -418,7 +415,8 @@ private int getColIndex(String seat) {
                     s.getHall().getHallNumber() + "|" +
                     s.getDate() + "|" +
                     s.getStartTime() + "|" +
-                    s.getEndTime();
+                    s.getEndTime() + "|" + 
+                    s.getBookedSeatsString();
         }
 
         FileHandler.overwriteFile(SHOWTIME_FILE, lines);
@@ -435,6 +433,7 @@ private int getColIndex(String seat) {
 
         for (String line : lines) {
             try {
+                
                 String[] p = line.split("\\|");
 
                 Movie movie = null;
@@ -458,7 +457,10 @@ private int getColIndex(String seat) {
                         p[4],
                         p[5]
                 );
-
+                s.resetSeats();
+                        if (p.length > 6 && p[6] != null && !p[6].isEmpty()) {
+    s.loadBookedSeats(p[6]);
+}
                 showtimes = append(showtimes, s);
                 showtimeCount++;
 
@@ -565,10 +567,10 @@ public void displayTimetableMatrix(String date) {
 
     int halls = 8;
 
-    System.out.println("\n===== TIMETABLE MATRIX (" + date + ") =====");
+    System.out.println("\n===== TIMETABLE (" + date + ") =====");
 
     // header
-    System.out.print(String.format("%-8s", "Hall\\Time"));
+    System.out.print(String.format("%-8s", "Time"));
 
     for (String t : slots) {
         System.out.print(String.format("%-6s", t));
