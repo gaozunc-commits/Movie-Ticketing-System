@@ -1,0 +1,14 @@
+Avengers Reassembled|Action|132|PG13
+Ocean Echo|Sci-Fi|118|PG
+Shadow Strike|Action|125|PG13
+Love in Paris|Romance|110|PG
+Galaxy Drift|Sci-Fi|140|PG13
+Haunted Manor|Horror|98|R
+The Last Kingdom|Drama|135|PG13
+Fast Velocity|Action|128|PG13
+Dream Chasers|Drama|115|PG
+Cyber future|Sci-Fi|123|PG13
+Silent Whisper|Thriller|105|PG13
+Jungle Quest|Adventure|130|PG
+Broken Trust|Drama|112|PG13
+Alien Horizon|Sci-Fi|138|PG13
